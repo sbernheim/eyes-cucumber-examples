@@ -1,0 +1,182 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.applitools.eyes.selenium</groupId>
+  <artifactId>eyes-cucumber-examples</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>eyes-cucumber-examples</name>
+  <description>Example Applitools Eyes Selenium Java Tests for Cucumber</description>
+  
+  <properties>
+    <maven.compiler.source>18</maven.compiler.source>
+    <maven.compiler.target>18</maven.compiler.target>
+    <eyes.version>5.40.0</eyes.version>
+    <testng.version>7.7.1</testng.version>
+    <cucumber.version>7.11.0</cucumber.version>
+    <cucumber.filter.tags></cucumber.filter.tags>
+    <slf4j.version>2.0.6</slf4j.version>
+    <apache.commons.version>3.12.0</apache.commons.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Set this to where Chromedriver is installed on your system! -->
+    <webdriver.chrome.driver>/opt/homebrew/bin/chromedriver</webdriver.chrome.driver>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.applitools</groupId>
+      <artifactId>eyes-selenium-java5</artifactId>
+      <version>${eyes.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-testng</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-picocontainer</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${apache.commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <profiles>
+    <profile>
+      <id>all</id>
+      <properties>
+        <cucumber.filter.tags>@all</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>some</id>
+      <properties>
+        <cucumber.filter.tags>@some</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>notsome</id>
+      <properties>
+        <cucumber.filter.tags>@all and not @some and not @web</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>web</id>
+      <properties>
+        <cucumber.filter.tags>@web</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>eyes</id>
+      <properties>
+        <cucumber.filter.tags>@web and @eyes</cucumber.filter.tags>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M8</version>
+        <!--
+        The Maven Surefire Plugin will run all the tests within your project's src/test/java
+        folder with filenames matching one of its default inclusion patterns, which includes
+        the RunCucumberTests.java file.  The Runner will then test your Cucumber features.
+        See: https://maven.apache.org/surefire/maven-surefire-plugin/index.html
+        
+        The Maven Surefile Plugin documentation describes its supported options for TestNG.
+        See: https://maven.apache.org/surefire/maven-surefire-plugin/examples/testng.html
+        -->
+        <configuration>
+          <!-- 
+          Setting the parallel configuration to "methods" tells Surefire to run each
+          invocation of TestNG's test methods in parallel.  The TestNG Runner class takes
+          the name of each Cucumber Scenario as a parameter from the DataProvider set by
+          the annotation on its scenarios method.  This effectively runs your project's
+          Cucumber Scenarios in parallel with the confirguations below.
+          -->
+          <parallel>methods</parallel>
+          <!--
+          Set the useUnlimitedThreads configuration to "true" to run as many parallel
+          tests as your JVM will allow.  The default is "false"
+          Set the threadCount configuration to an integer to specify the maximum number of
+          parallel tests to run at the same time.  The default is 10.
+          -->
+          <!-- <useUnlimitedThreads>true</useUnlimitedThreads> -->
+          <threadCount>3</threadCount>
+          <testFailureIgnore>true</testFailureIgnore>
+          <systemPropertyVariables>
+            <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
+            <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+          </systemPropertyVariables>
+          <properties>
+            <property>
+            <!-- Controls TestNG's verbosity on a scale of 1 to 10
+                  0 is least detailed, 
+                  10 is most detailed, 
+                  -1 is debug mode for preserving stack traces and debug logging. -->
+              <name>surefire.testng.verbose</name>
+              <value>-1</value>
+            </property>
+          </properties>
+        </configuration>
+      </plugin>
+      <!-- 
+      The Maven Failsafe Plugin will run all the tests within your project's src/test/java
+      folder with filenames matching one of its default inclusion patterns.  Change the
+      RunCucumberTests.java file and class name to RunCucumberIT and uncomment the plugin
+      declaration below in order to run your tests with Filsafe instead of Surefile.
+      See: https://maven.apache.org/surefire/maven-failsafe-plugin/index.html
+      
+      The Maven Failsafe Plugin documentation describes its supported options for TestNG.
+      See: https://maven.apache.org/surefire/maven-failsafe-plugin/examples/testng.html
+      -->
+      <!--
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <parallel>methods</parallel>
+              <useUnlimitedThreads>true</useUnlimitedThreads>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
+    </plugins>
+  </build>
+
+</project>
