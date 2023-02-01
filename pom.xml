@@ -19,6 +19,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Set this to where Chromedriver is installed on your system! -->
     <webdriver.chrome.driver>/opt/homebrew/bin/chromedriver</webdriver.chrome.driver>
+    <webdriver.chrome.headless>true</webdriver.chrome.headless>
+    <applitools.api.skip.checks>false</applitools.api.skip.checks>
   </properties>
 
   <dependencies>
@@ -96,6 +98,36 @@
         <cucumber.filter.tags>@web and @eyes</cucumber.filter.tags>
       </properties>
     </profile>
+    <profile>
+      <id>shifting</id>
+      <properties>
+        <cucumber.filter.tags>@shifting</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>shiftinglist</id>
+      <properties>
+        <cucumber.filter.tags>@shiftinglist</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>shiftingimage</id>
+      <properties>
+        <cucumber.filter.tags>@shiftingimage</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>shiftingmenus</id>
+      <properties>
+        <cucumber.filter.tags>@shiftingmenus</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>disabled</id>
+      <properties>
+        <applitools.api.skip.checks>true</applitools.api.skip.checks>
+      </properties>
+    </profile>
   </profiles>
 
   <build>
@@ -134,6 +166,8 @@
           <systemPropertyVariables>
             <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+            <webdriver.chrome.headless>${webdriver.chrome.headless}</webdriver.chrome.headless>
+            <applitools.api.skip.checks>${applitools.api.skip.checks}</applitools.api.skip.checks>
           </systemPropertyVariables>
           <properties>
             <property>
