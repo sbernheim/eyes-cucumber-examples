@@ -155,10 +155,14 @@ public class EyesBatchManager {
              */
             //config.setApiKey(settings.applitoolsApiKey.get());
         }
+        
+        if (settings.serverUrl.isNotBlank()) {
+            config.setServerUrl(settings.serverUrl.get());
+        }
 
         if (settings.applitoolsApiDisabled) {
             config.setIsDisabled(true);
-            log.debug("Thread ID [{}]--> EYES BATCH \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.applitoolsApiDisabled);
+            log.info("Thread ID [{}]--> EYES BATCH \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.applitoolsApiDisabled);
         }
 
         // Set the batch for the config.
