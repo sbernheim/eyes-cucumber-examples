@@ -22,12 +22,10 @@ public class DropdownSteps extends PageTest {
     private static final Logger log = LoggerFactory.getLogger(thisClass());
     
     private DropdownPage dropdownPage;
-    //private EyesManager eyesManager;
     
-    public DropdownSteps(HerokuInternetSite site, EyesManager eyesManager) {
+    public DropdownSteps(HerokuInternetSite site) {
         super(site);
         this.dropdownPage = new DropdownPage(site);
-        //this.eyesManager = eyesManager;
     }
     
     @Given("I am on the Dropdown page")
@@ -63,12 +61,5 @@ public class DropdownSteps extends PageTest {
         String selectedValue = dropdownPage.getSelectedValues().stream().findFirst().get();
         assertEquals(selectedValue, expectedValue, "the selected item value is not correct!");
     }
-    
-    /*@Then("check the {string} step with eyes")
-    public void checkWithEyes(String step) {
-        log.info("Thread ID [{}] checking the page for step '{}'", getThreadId(), step);
-        eyesManager.eyes().check(Target.window().withName(step));
-        log.info("Thread ID [{}] checking the page for step '{}'", getThreadId(), step);
-    }*/
     
 }
