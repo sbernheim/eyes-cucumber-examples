@@ -60,9 +60,9 @@ public class EyesManager {
             eyes.setBaselineEnvName(settings.baselineEnvironment.get());
         }
         
-        if (settings.applitoolsApiDisabled) {
+        if (settings.isDisabled) {
             eyes.setIsDisabled(true);
-            log.debug("Thread ID [{}]--> EYES \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.applitoolsApiDisabled);
+            log.debug("Thread ID [{}]--> EYES \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.isDisabled);
         }
         
         // Open Eyes to start visual testing.

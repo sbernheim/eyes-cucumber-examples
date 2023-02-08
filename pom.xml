@@ -12,7 +12,7 @@
     <eyes.version>5.40.0</eyes.version>
     <testng.version>7.7.1</testng.version>
     <cucumber.version>7.11.0</cucumber.version>
-    <cucumber.filter.tags></cucumber.filter.tags>
+    <cucumber.filter.tags>@all</cucumber.filter.tags>
     <slf4j.version>2.0.6</slf4j.version>
     <apache.commons.version>3.12.0</apache.commons.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,7 @@
     <!-- Set this to where Chromedriver is installed on your system! -->
     <webdriver.chrome.driver>/opt/homebrew/bin/chromedriver</webdriver.chrome.driver>
     <webdriver.chrome.headless>true</webdriver.chrome.headless>
-    <applitools.api.skip.checks>false</applitools.api.skip.checks>
+    <applitools.api.disabled>false</applitools.api.disabled>
   </properties>
 
   <dependencies>
@@ -69,9 +69,9 @@
   
   <profiles>
     <profile>
-      <id>all</id>
+      <id>everything</id>
       <properties>
-        <cucumber.filter.tags>@all</cucumber.filter.tags>
+        <cucumber.filter.tags></cucumber.filter.tags>
       </properties>
     </profile>
     <profile>
@@ -96,6 +96,24 @@
       <id>eyes</id>
       <properties>
         <cucumber.filter.tags>@web and @eyes</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>formauth</id>
+      <properties>
+        <cucumber.filter.tags>@formauth</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>dropdowns</id>
+      <properties>
+        <cucumber.filter.tags>@dropdowns</cucumber.filter.tags>
+      </properties>
+    </profile>
+    <profile>
+      <id>hovers</id>
+      <properties>
+        <cucumber.filter.tags>@hovers</cucumber.filter.tags>
       </properties>
     </profile>
     <profile>
@@ -125,8 +143,72 @@
     <profile>
       <id>disabled</id>
       <properties>
-        <applitools.api.skip.checks>true</applitools.api.skip.checks>
+        <applitools.api.disabled>true</applitools.api.disabled>
       </properties>
+    </profile>
+    <profile>
+      <id>eyesbasic</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>ApplitoolsEyesBasicTest.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>eyestestng</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/testng/eyes-test.xml</suiteXmlFile>
+              </suiteXmlFiles>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>runheroku</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>RunHerokuInternetTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>runexample</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>RunExampleTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
@@ -167,7 +249,7 @@
             <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
             <webdriver.chrome.headless>${webdriver.chrome.headless}</webdriver.chrome.headless>
-            <applitools.api.skip.checks>${applitools.api.skip.checks}</applitools.api.skip.checks>
+            <applitools.api.disabled>${applitools.api.disabled}</applitools.api.disabled>
           </systemPropertyVariables>
           <properties>
             <property>

@@ -18,7 +18,7 @@ public class Settings {
     public StringSetting applitoolsApiKey;
     public StringSetting serverUrl;
     public boolean renderOnUltraFastGrid;
-    public boolean applitoolsApiDisabled;
+    public boolean isDisabled;
     public boolean isAccessibilityValidationEnabled;
     public int concurrency;
     public AccessibilityLevel accessibilityLevel;
@@ -68,8 +68,8 @@ public class Settings {
                 .asLong()
                 .orDefault(defaultImplicitWaitSeconds);
 
-        applitoolsApiDisabled = Setting.fromProperty("applitools.api.skip.checks")
-                .orEnv("APPLITOOLS_API_SKIP_CHECKS")
+        isDisabled = Setting.fromProperty("applitools.api.disabled")
+                .orEnv("APPLITOOLS_DISABLED")
                 .asBoolean()
                 .orDefault(false);
 
@@ -91,16 +91,16 @@ public class Settings {
         // Use the batchId env var set by the Applitools Jenkins plug-in if defined,
         batchId = Setting.fromProperty("applitools.api.batch.id").orEnv("APPLITOOLS_BATCH_ID");
 
-        // Use the APPLITOOLS_BRANCH_NAME env var set by Applitools Jenkins CI,
-        // GitHub, GitLab, and/or Bitbucket integrations if defined.
-        // Use the APPLITOOLS_BRANCH_NAME env var set by Applitools Jenkins CI,
-        branchName = Setting.fromProperty("applitools.api.branch").orEnv("APPLITOOLS_BRANCH_NAME");
-        
         // Use the APPLITOOLS_BATCH_NAME set by the Applitools Jenkins plug-in if defined,
         batchName = Setting.fromProperty("applitools.api.batch.name").orEnv("APPLITOOLS_BATCH_NAME");
                 //.orGet(this::suiteBatchName)
                 //.orDefault(defaultBatchName);
 
+        // Use the APPLITOOLS_BRANCH_NAME env var set by Applitools Jenkins CI,
+        // GitHub, GitLab, and/or Bitbucket integrations if defined.
+        // Use the APPLITOOLS_BRANCH_NAME env var set by Applitools Jenkins CI,
+        branchName = Setting.fromProperty("applitools.api.branch").orEnv("APPLITOOLS_BRANCH_NAME");
+        
         baselineEnvironment = Setting.fromProperty("applitools.api.baseline.environment").orEnv("APPLITOOLS_BASELINE_ENVIRONMENT");
 
         mobileBaselineEnvironment = Setting.fromProperty("applitools.api.baseline.environment.mobile").orEnv("APPLITOOLS_MOBILE_BASELINE_ENVIRONMENT");

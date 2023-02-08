@@ -160,9 +160,9 @@ public class EyesBatchManager {
             config.setServerUrl(settings.serverUrl.get());
         }
 
-        if (settings.applitoolsApiDisabled) {
+        if (settings.isDisabled) {
             config.setIsDisabled(true);
-            log.info("Thread ID [{}]--> EYES BATCH \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.applitoolsApiDisabled);
+            log.info("Thread ID [{}]--> EYES BATCH \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.isDisabled);
         }
 
         // Set the batch for the config.

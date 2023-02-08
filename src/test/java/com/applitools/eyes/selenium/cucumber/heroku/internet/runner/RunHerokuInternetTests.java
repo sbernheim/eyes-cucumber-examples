@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
         "com.applitools.eyes.selenium.cucumber.hooks",
         "com.applitools.eyes.selenium.cucumber.heroku.internet.steps"
     },
-    tags = "@web", // A tag expression for the tests this runner will run.
+    //tags = "@web", // A tag expression for the tests this runner will run.
     plugin = {  // A comma-delimited list of Cucumber plug-ins.
         //"html:target/cucumber.html",    // html, json and pretty are built in report formatters
         //"json:target/cucumber.json",
