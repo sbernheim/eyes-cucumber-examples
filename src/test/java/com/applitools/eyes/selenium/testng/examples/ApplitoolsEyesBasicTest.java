@@ -165,12 +165,13 @@ public class ApplitoolsEyesBasicTest {
         // This snapshot uses LAYOUT match level to avoid differences in closing time text.
         eyes.check(Target.window().fully().withName("Main page"));
 
+        // Close Eyes
+        eyes.closeAsync();
+
         // Quit the WebDriver instance.
         driver.quit();
 
-        // Close Eyes to tell the server it should display the results.
-        eyes.closeAsync();
-
+        // Gets results of all the tests AND implicitly closes the Batch
         TestResultsSummary allTestResults = runner.getAllTestResults();
 
         log.info("End basic example test");

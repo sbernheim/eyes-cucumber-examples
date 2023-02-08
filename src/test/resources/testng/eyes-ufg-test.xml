@@ -1,0 +1,10 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name = "Example Bank App">
+   <test name = "Bank Login">
+      <classes>
+         <class name = "com.applitools.eyes.selenium.testng.examples.ApplitoolsEyesUFGTest"/>
+      </classes>
+   </test>
+</suite>

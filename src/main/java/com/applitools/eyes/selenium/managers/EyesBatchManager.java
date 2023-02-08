@@ -179,48 +179,48 @@ public class EyesBatchManager {
         log.info("Thread ID [{}]--> EYES BATCH adding browser and device configurations", getThreadId());
 
         // Add different desktop browsers with different viewports for cross-browser testing in the Ultrafast Grid.
-        /*if (baselineEnvironment.isPresent()) {
-            System.out.printf("BeforeSuite : %s using baseline environment %s\n", thisMethod, baselineEnvironment.get());
-            config.addBrowser(1024, 768, BrowserType.CHROME, baselineEnvironment.get()); // This is the "desktop-browser" baseline
-            //config.addBrowser(1920, 1080, BrowserType.CHROME, baselineEnvironment.get());
-            //config.addBrowser(3840, 2160, BrowserType.FIREFOX, baselineEnvironment.get());
-            //config.addBrowser(3008, 1692, BrowserType.SAFARI, baselineEnvironment.get());
-            //config.addBrowser(2560, 1440, BrowserType.SAFARI_TWO_VERSIONS_BACK, baselineEnvironment.get());
-            //config.addBrowser(1504, 846, BrowserType.EDGE_LEGACY, baselineEnvironment.get());
-            //config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM, baselineEnvironment.get());
-            //config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM_TWO_VERSION_BACK, baselineEnvironment.get());
-            //config.addBrowser(1024, 768, BrowserType.IE_11, baselineEnvironment.get());
-            //config.addBrowser(1024, 768, BrowserType.IE_10, baselineEnvironment.get());
-        } else {*/
+        if (settings.baselineEnvironment.isNotBlank()) {
+            String baselineEnvName = settings.baselineEnvironment.get();
+            log.info("Using baseline environment {}", baselineEnvName);
+            config.addBrowser(1024, 768, BrowserType.CHROME, baselineEnvName); // This is the "desktop-browser" baseline
+            config.addBrowser(1024, 768, BrowserType.FIREFOX, baselineEnvName);
+            config.addBrowser(3008, 1692, BrowserType.SAFARI, baselineEnvName);
+            //config.addBrowser(2560, 1440, BrowserType.SAFARI_TWO_VERSIONS_BACK, baselineEnvName);
+            //config.addBrowser(1504, 846, BrowserType.EDGE_LEGACY, baselineEnvName);
+            config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM, baselineEnvName);
+            //config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM_TWO_VERSION_BACK, baselineEnvName);
+            config.addBrowser(1024, 768, BrowserType.IE_11, baselineEnvName);
+            //config.addBrowser(1024, 768, BrowserType.IE_10, baselineEnvName);
+        } else {
             config.addBrowser(1024, 768, BrowserType.CHROME); // This is the "desktop-browser" baseline
-            //config.addBrowser(1920, 1080, BrowserType.CHROME);
-            //config.addBrowser(3840, 2160, BrowserType.FIREFOX);
-            //config.addBrowser(3008, 1692, BrowserType.SAFARI);
+            config.addBrowser(1024, 768, BrowserType.FIREFOX);
+            config.addBrowser(3008, 1692, BrowserType.SAFARI);
             //config.addBrowser(2560, 1440, BrowserType.SAFARI_TWO_VERSIONS_BACK);
             //config.addBrowser(1504, 846, BrowserType.EDGE_LEGACY);
-            //config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM);
+            config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM);
             //config.addBrowser(1024, 768, BrowserType.EDGE_CHROMIUM_TWO_VERSION_BACK);
-            //config.addBrowser(1024, 768, BrowserType.IE_11);
+            config.addBrowser(1024, 768, BrowserType.IE_11);
             //config.addBrowser(1024, 768, BrowserType.IE_10);
-        //}
+        }
 
         // Add mobile emulation devices with different orientations for cross-browser testing in the Ultrafast Grid.
-        /*if (mobileBaselineEnvironment.isPresent()) {
-            System.out.printf("BeforeSuite : %s using mobile baseline environment %s\n", thisMethod, mobileBaselineEnvironment.get());
-            config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT, mobileBaselineEnvironment.get()); // I think this is the "mobile-browser" baseline
-            //config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvironment.get());
-            //config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvironment.get());
-            //config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE, mobileBaselineEnvironment.get());
-            //config.addDeviceEmulation(DeviceName.OnePlus_7T, ScreenOrientation.LANDSCAPE, mobileBaselineEnvironment.get());
-            //config.addDeviceEmulation(DeviceName.Kindle_Fire_HDX, ScreenOrientation.PORTRAIT, mobileBaselineEnvironment.get());
-        } else {*/
+        if (settings.mobileBaselineEnvironment.isNotBlank()) {
+            String mobileBaselineEnvName = settings.mobileBaselineEnvironment.get();
+            log.info("Using mobile baseline environment {}", mobileBaselineEnvName);
+            config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
+            config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
+            config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
+            config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE, mobileBaselineEnvName);
+            config.addDeviceEmulation(DeviceName.OnePlus_7T, ScreenOrientation.LANDSCAPE, mobileBaselineEnvName);
+            //config.addDeviceEmulation(DeviceName.Kindle_Fire_HDX, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
+        } else {
             config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT); // I think this is the "mobile-browser" baseline
-            //config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT);
-            //config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT);
-            //config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE);
-            //config.addDeviceEmulation(DeviceName.OnePlus_7T, ScreenOrientation.LANDSCAPE);
+            config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT);
+            config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT);
+            config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE);
+            config.addDeviceEmulation(DeviceName.OnePlus_7T, ScreenOrientation.LANDSCAPE);
             //config.addDeviceEmulation(DeviceName.Kindle_Fire_HDX, ScreenOrientation.PORTRAIT);
-        //}
+        }
 
         return config;
     }
