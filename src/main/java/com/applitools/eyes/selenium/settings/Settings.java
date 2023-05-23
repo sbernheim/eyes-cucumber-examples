@@ -18,6 +18,7 @@ public class Settings {
     public StringSetting applitoolsApiKey;
     public StringSetting serverUrl;
     public boolean renderOnUltraFastGrid;
+    public boolean runOnApplitoolsExecutionCloud;
     public boolean isDisabled;
     public boolean isAccessibilityValidationEnabled;
     public int concurrency;
@@ -106,7 +107,12 @@ public class Settings {
         mobileBaselineEnvironment = Setting.fromProperty("applitools.api.baseline.environment.mobile").orEnv("APPLITOOLS_MOBILE_BASELINE_ENVIRONMENT");
 
         renderOnUltraFastGrid = Setting.fromProperty("applitools.ultra.fast.grid")
-                .orEnv("APPLITOOLS_ULTRA_FAST_GRID")
+                .orEnv("APPLITOOLS_ULTRAFAST_GRID")
+                .asBoolean()
+                .orDefault(false);
+
+        runOnApplitoolsExecutionCloud = Setting.fromProperty("applitools.execution.cloud")
+                .orEnv("APPLITOOLS_EXECUTION_CLOUD")
                 .asBoolean()
                 .orDefault(false);
 

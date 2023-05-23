@@ -6,15 +6,15 @@ Feature: Heroku Internet Shifting Content Pages
   In order to demonstrate shifting and changing content
   I want to check the Heroku Internet Shifting Content pages
   
-  @eyes @shiftingtext
+  @eyes @shiftinglist
   Scenario: List items with dynamic text
     Given I am on the Shifting List Content page
-    Then check the "Dynamic List Text" step with eyes
+    Then check the "Dynamic List Text" page for all layout breakpoints 
     
   @eyes @shiftingimage
   Scenario: Shifting image
     Given I am on the Shifting Image page
-    Then check the "Shifting Image" step with eyes
+    Then check the "Shifting Image" page for all layout breakpoints 
     
   @eyes @shiftingmenus
   Scenario Outline: Hover mouse over shifting menu item <item>

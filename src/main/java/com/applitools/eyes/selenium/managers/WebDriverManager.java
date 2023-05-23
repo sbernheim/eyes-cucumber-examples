@@ -2,6 +2,8 @@ package com.applitools.eyes.selenium.managers;
 
 import static com.applitools.eyes.selenium.introspection.Introspect.*;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 
 import org.openqa.selenium.Dimension;
@@ -10,9 +12,12 @@ import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.introspection.Introspect;
 import com.applitools.eyes.selenium.settings.Settings;
 
@@ -41,11 +46,23 @@ public class WebDriverManager {
      * Run this before starting your tests.
      */
     public void startBrowser() {
-        log.info("Thread ID [{}] starting web browser", getThreadId());
+        log.info("Thread ID [{}] creating web browser driver", getThreadId());
 
-        ChromeOptions opts = new ChromeOptions().setHeadless(settings.headless);
-
-        this.driver = new ChromeDriver(opts);
+        if (settings.runOnApplitoolsExecutionCloud) {
+            // Open the browser remotely in the Execution Cloud.
+            DesiredCapabilities caps = new DesiredCapabilities();
+            caps.setBrowserName("chrome");
+            RemoteWebDriver remoteDriver = new RemoteWebDriver(applitoolsExecutionCloudURL(), caps);
+            log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", applitoolsExecutionCloudURL());
+            this.driver = remoteDriver;
+        }
+        else {
+            // Open the browser with a local ChromeDriver instance.
+            ChromeOptions opts = new ChromeOptions();
+            if (settings.headless) opts.addArguments("--headless=new");
+            this.driver = new ChromeDriver(opts);
+            log.info("Eyes tests will execute on your local Chrome browser...");
+        }
 
         /* For larger projects, use explicit waits for better control.
          * https://www.selenium.dev/documentation/webdriver/waits/
@@ -57,6 +74,15 @@ public class WebDriverManager {
         /* If you are using Selenium 3, use the following call instead:
          */
         //driver.manage().timeouts().implicitlyWait(settings.implicitWaitSeconds, TimeUnit.SECONDS);
+    }
+    
+    // Return the Applitools Self-Healing Execution Cloud URL or throw a RuntimeException
+    private URL applitoolsExecutionCloudURL() {
+        try {
+            return new URL(Eyes.getExecutionCloudURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Failed to parse Applitools Execution Cloud URL!", e);
+        }
     }
     
     /*

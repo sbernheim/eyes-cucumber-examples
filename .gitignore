@@ -13,7 +13,7 @@ buildNumber.properties
 *.iml
 .idea
 logs/**
-test-output/**
+test-output/
 .project
 .classpath
-.settings/**
+.settings/

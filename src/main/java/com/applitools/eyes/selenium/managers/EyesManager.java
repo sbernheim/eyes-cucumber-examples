@@ -5,6 +5,7 @@ import static com.applitools.eyes.selenium.introspection.Introspect.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.applitools.eyes.FileLogger;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.introspection.Introspect;
 import com.applitools.eyes.selenium.settings.Settings;
@@ -64,6 +65,22 @@ public class EyesManager {
             eyes.setIsDisabled(true);
             log.debug("Thread ID [{}]--> EYES \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.isDisabled);
         }
+        
+        // If you're using Eyes Selenium Java3, you can use one of the following calls to
+        // get log messages from the Eyes SDK.
+        //
+        // This one will log messages to a specific file.
+        //eyes.setLogHandler(new FileLogger("/dev/null", true, true));
+        //
+        // This one will log messages to the console via STDOUT.
+        //eyes.setLogHandler(new StdoutLogHandler(true));
+        //
+        // If you're using Eyes Selenium Java5, the setLogHandler method calls don't do anything
+        // and the Eyes Universal SDK client logs to a separate file in your temp directory.
+        // In that case, you should find the path to those log files in your test's execution log,
+        // or you can look for them yourself in $TMPDIR/applitools-logs/ or in a Windows context
+        // in $env:TEMP/applitools-logs/
+        
         
         // Open Eyes to start visual testing.
         // It is a recommended practice to set all four inputs:
