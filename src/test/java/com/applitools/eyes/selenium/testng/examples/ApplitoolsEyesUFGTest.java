@@ -8,7 +8,6 @@ import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.exceptions.DiffsFoundException;
 import com.applitools.eyes.selenium.BrowserType;
-import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.fluent.Target;
@@ -56,7 +55,7 @@ public class ApplitoolsEyesUFGTest {
     
     // Eyes Batch meta-data values
     private static final String batchPrefix = "Eyes Demo: ";
-    private static String appName = "TestNG Example";
+    private static String appName = "Acme Bank";
     private static String batchName = batchPrefix + appName;
     private int browserHeight = 768;
     private int browserWidth = 1024;
@@ -87,7 +86,7 @@ public class ApplitoolsEyesUFGTest {
         headless = Boolean.parseBoolean(System.getenv().getOrDefault("HEADLESS", "true"));
 
         // An environment variable that disables all the Eyes API calls.
-        eyesIsDisabled = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_DISABLED", "false"));
+        eyesIsDisabled = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_IS_DISABLED", "false"));
 
         // An environment variable that disables all the Eyes API calls.
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
@@ -104,6 +103,15 @@ public class ApplitoolsEyesUFGTest {
         // A batch is the collection of visual checkpoints for a test suite.
         // Batches are displayed in the dashboard, so use meaningful names.
         batch = new BatchInfo(batchName);
+
+        // Add Property key/value pairs to group and filter batch results in the Dashboard UI.
+        batch.addProperty("Environment", "LOCAL");
+        batch.addProperty("Language", "Java");
+        batch.addProperty("SDK", "Selenium Java5");
+        batch.addProperty("Framework", "TestNG");
+        batch.addProperty("Scope", "Suite");
+        batch.addProperty("Hooks", "true");
+        batch.addProperty("Runner", "VisualGrid");
 
         // Create a configuration for Applitools Eyes.
         log.info("Before: Class for {} - APPLITOOLS creating config", Introspect.thisClass());
@@ -151,7 +159,9 @@ public class ApplitoolsEyesUFGTest {
         // Open the browser with the ChromeDriver instance.
         // Even though this test will run visual checkpoints on different browsers in the Ultrafast Grid,
         // it still needs to run the test one time locally to capture snapshots.
-        driver = new ChromeDriver(new ChromeOptions().setHeadless(headless));
+        ChromeOptions opts = new ChromeOptions();
+        if (headless) opts.addArguments("--headless=new");
+        driver = new ChromeDriver(opts);
 
         // Set the browser window size - height, width
         driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
@@ -168,6 +178,12 @@ public class ApplitoolsEyesUFGTest {
         // Create the Applitools Eyes object connected to the Runner and set its configuration.
         eyes = new Eyes(runner);
         eyes.setConfiguration(config);
+        
+        // Add property key/value pairs to filter and group test results in the Dashboard UI.
+        eyes.addProperty("Function", "Login");
+        eyes.addProperty("Letter", "A");
+        eyes.addProperty("Number", "1");
+        eyes.addProperty("Boolean", "true");
         
         // An environment variable that disables all the Eyes API calls.
         if (eyesIsDisabled) {

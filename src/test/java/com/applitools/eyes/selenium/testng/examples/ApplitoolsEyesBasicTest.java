@@ -37,14 +37,14 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Example Bank App";
+    private static final String batchName = "Eyes Demo: Acme Bank";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Example Bank App";
+    private static final String appName = "Acme Bank";
     private String testName = "Bank Login";
     private int browserHeight = 768;
     private int browserWidth = 1024;
@@ -58,7 +58,7 @@ public class ApplitoolsEyesBasicTest {
         
     @Test
     public void loginPageTest() {
-        log.info("Start basic example test");
+        log.info("Start basic UI test");
 
         // This test covers login for the Applitools demo site, which is a dummy banking app.
         // The interactions use typical Selenium WebDriver calls,
@@ -73,14 +73,14 @@ public class ApplitoolsEyesBasicTest {
         // NOTE: this is not strictly required when using the eyes-selenium-java5 SDK.
         applitoolsApiKey = System.getenv("APPLITOOLS_API_KEY");
         
-        eyesServerUrl = System.getenv("APPLITOOLS_SERVER_URL");
+        //eyesServerUrl = System.getenv("APPLITOOLS_SERVER_URL");
 
         // Read the headless mode setting from an environment variable.
         // Use headless mode for Continuous Integration (CI) execution.
         // Use headed mode for local development.
         headless = Boolean.parseBoolean(System.getenv().getOrDefault("WEBDRIVER_HEADLESS", "true"));
         
-        eyesIsDisabled = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_DISABLED", "false"));
+        //eyesIsDisabled = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_IS_DISABLED", "false"));
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
@@ -93,14 +93,23 @@ public class ApplitoolsEyesBasicTest {
         // A batch is the collection of visual checkpoints for a test suite.
         // Batches are displayed in the dashboard, so use meaningful names.
         batch = new BatchInfo(batchName);
+        
+        // Add Property key/value pairs to group and filter batch results in the Dashboard UI.
+        batch.addProperty("Environment", "LOCAL");
+        batch.addProperty("Language", "Java");
+        batch.addProperty("SDK", "Selenium Java5");
+        batch.addProperty("Framework", "TestNG");
+        batch.addProperty("Scope", "Basic");
+        batch.addProperty("Hooks", "false");
+        batch.addProperty("Runner", "No");
 
         // Create a configuration for Applitools Eyes.
         //System.out.printf("Before: Class for %s - APPLITOOLS creating config\n", this.getClass().getSimpleName());
         config = new Configuration();
 
         if (Strings.isNotNullAndNotEmpty(eyesServerUrl)) {
-            log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
-            config.setServerUrl(eyesServerUrl);
+            //log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
+            //config.setServerUrl(eyesServerUrl);
         }
 
         // Set the Applitools API key so test results are uploaded to your account.
@@ -110,11 +119,14 @@ public class ApplitoolsEyesBasicTest {
 
         // The BatchInfo is a component of the Configuration
         config.setBatch(batch);
+        //config.setDisableBrowserFetching(true);
 
         // Open the browser with the ChromeDriver instance.
         // Even though this test will run visual checkpoints on different browsers in the Ultrafast Grid,
         // it still needs to run the test one time locally to capture snapshots.
-        driver = new ChromeDriver(new ChromeOptions().setHeadless(headless));
+        ChromeOptions opts = new ChromeOptions();
+        if (headless) opts.addArguments("--headless=new");
+        driver = new ChromeDriver(opts);
         
         // Set the browser window size - height, width
         driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
@@ -133,6 +145,12 @@ public class ApplitoolsEyesBasicTest {
 
         // The Configuration includes all the default settings for this Eyes test
         eyes.setConfiguration(config);
+        
+        // Add property key/value pairs to filter and group test results in the Dashboard UI.
+        eyes.addProperty("Function", "Login");
+        eyes.addProperty("Letter", "A");
+        eyes.addProperty("Number", "1");
+        eyes.addProperty("Boolean", "true");
         
         // Disable all Eyes API calls if the environment variable was set
         // An environment variable that disables all the Eyes API calls.
@@ -164,6 +182,7 @@ public class ApplitoolsEyesBasicTest {
         // Verify the full main page loaded correctly.
         // This snapshot uses LAYOUT match level to avoid differences in closing time text.
         eyes.check(Target.window().fully().withName("Main page"));
+        eyes.check(Target.window().fully().setDisableBrowserFetching(true).withName("Main page"));
 
         // Close Eyes
         eyes.closeAsync();

@@ -9,7 +9,7 @@
   <properties>
     <maven.compiler.source>18</maven.compiler.source>
     <maven.compiler.target>18</maven.compiler.target>
-    <eyes.version>5.52.0</eyes.version>
+    <eyes.version>5.54.0</eyes.version>
     <testng.version>7.7.1</testng.version>
     <cucumber.version>7.11.0</cucumber.version>
     <cucumber.filter.tags>@all</cucumber.filter.tags>
@@ -19,7 +19,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Set this to where Chromedriver is installed on your system! -->
     <webdriver.chrome.driver>/opt/homebrew/bin/chromedriver</webdriver.chrome.driver>
-    <webdriver.chrome.headless>true</webdriver.chrome.headless>
+    <webdriver.chrome.headless>false</webdriver.chrome.headless>
     <applitools.api.disabled>false</applitools.api.disabled>
   </properties>
 
@@ -144,6 +144,12 @@
       <id>disabled</id>
       <properties>
         <applitools.api.disabled>true</applitools.api.disabled>
+      </properties>
+    </profile>
+    <profile>
+      <id>headless</id>
+      <properties>
+        <webdriver.chrome.headless>true</webdriver.chrome.headless>
       </properties>
     </profile>
     <profile>
