@@ -1,8 +1,8 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name = "Example Bank App">
-   <test name = "Bank Login">
+<suite name = "Federal Reserve Bank of Philadelphia">
+   <test name = "FRB Philadelphia Menus">
       <classes>
          <class name = "com.applitools.eyes.selenium.testng.examples.ApplitoolsEyesTestNGTest"/>
       </classes>

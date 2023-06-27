@@ -12,10 +12,8 @@ import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
-import com.applitools.eyes.selenium.fluent.Target;
 import com.applitools.eyes.selenium.introspection.Introspect;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -25,7 +23,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Ignore;
@@ -48,24 +45,17 @@ public class ApplitoolsBasicUITest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Acme Bank";
+    private static final String batchName = "Eyes Demo: Federal Reserve Bank";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Acme Bank";
-    private String testName = "Bank Login";
+    private static final String appName = "Federal Reserve Bank of Philadelphia";
+    private String testName = "FRB Philadelphia Menus";
     private int browserHeight = 768;
     private int browserWidth = 1024;
-
-    // Values used by the test
-    private String pageURL1 = "https://demo.applitools.com";
-    private String pageURL2 = "https://demo.applitools.com/index_v2.html";
-    private String pageURL = pageURL1;
-    private String username = "applibot";
-    private String password = "I<3VisualTests";
 
     @BeforeSuite
     public void createBatchConfigs() {
@@ -95,7 +85,6 @@ public class ApplitoolsBasicUITest {
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
-        pageURL = forceDiffs ? pageURL2 : pageURL1;
 
         // Create the runner 
         runner = new ClassicRunner();
@@ -135,11 +124,17 @@ public class ApplitoolsBasicUITest {
         log.info("End BeforeSuite");
     }
 
+    @Ignore
     @Test
-    public void loginPageTest() {
-        log.info("Start basic example test");
+    public void basicUiWebSiteTest() {
+        log.info("Start basic Eyes Execution Cloud test");
 
+        // Checks whether we will run this test on a local browser or on the Execution Cloud
         boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
+
+        // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
+        // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
+        // it still needs to run the test one time in a browser to capture snapshots.
         if (ecx) {
             // Open the browser remotely in the Execution Cloud.
             DesiredCapabilities caps = new DesiredCapabilities();
@@ -199,46 +194,39 @@ public class ApplitoolsBasicUITest {
                           // The viewport size for the local browser - width , height
                 new RectangleSize(browserWidth, browserHeight));
         
-        // Load the login page.
-        driver.get(pageURL);
+        try {
+            ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            
+            /*if (ecx) jsExec.executeScript("applitools:endTest", "Passed");*/
 
-        // Verify the full login page loaded correctly.
-        eyes.check(Target.window().fully().withName("Login page"));
+            // Close Eyes
+            eyes.closeAsync();
+            
+            // Quit the WebDriver instance.
+            driver.quit();
+            
+            // Gets results of all the tests AND implicitly closes the Batch
+            TestResultsSummary allTestResults = runner.getAllTestResults(false);
+            
+            log.info("End basic Eyes Execution Cloud test");
+            log.info("RESULTS: {}", allTestResults);
+        }
 
-        /*JavascriptExecutor jsExec = (JavascriptExecutor) driver;
-        if (ecx) jsExec.executeScript("applitools:startTest", "Non-Eyes Test!", appName);*/
-
-        // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
-
-        // Verify the full main page loaded correctly.
-        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
-        eyes.check(Target.window().fully().withName("Main page"));
-        //eyes.check(Target.window().fully().setDisableBrowserFetching(true).withName("Main page"));
-        
-        /*if (ecx) jsExec.executeScript("applitools:endTest", "Passed");*/
-
-        // Close Eyes
-        eyes.closeAsync();
-
-        // Quit the WebDriver instance.
-        driver.quit();
-
-        // Gets results of all the tests AND implicitly closes the Batch
-        TestResultsSummary allTestResults = runner.getAllTestResults(false);
-
-        log.info("End non-eyes test");
-        log.info("RESULTS: {}", allTestResults);
     }
     
-    @Ignore
     @Test
     public void nonEyesTest() {
         log.info("Start non-eyes test");
 
+        // Checks whether we will run this test on a local browser or on the Execution Cloud
         boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
+
+        // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
+        // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
+        // it still needs to run the test one time in a browser to capture snapshots.
         if (ecx) {
             // Open the browser remotely in the Execution Cloud.
             DesiredCapabilities caps = new DesiredCapabilities();
@@ -303,16 +291,8 @@ public class ApplitoolsBasicUITest {
                 )
          );
 
-        // Load the login page.
-        driver.get(pageURL);
+        ApplitoolsFederalReserveTest.runTest(driver, null, forceDiffs);
 
-        // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
-
-        Assert.assertEquals(driver.getCurrentUrl(), pageURL1 + "/app.html", "Not on the right page!");
-        
         if (ecx) jsExec.executeScript("applitools:endTest", Map.ofEntries(en("status", "Passed")));
 
         // Quit the WebDriver instance.

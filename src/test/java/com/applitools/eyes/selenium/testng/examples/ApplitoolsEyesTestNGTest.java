@@ -1,6 +1,7 @@
 package com.applitools.eyes.selenium.testng.examples;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.time.Duration;
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
@@ -10,14 +11,14 @@ import com.applitools.eyes.exceptions.DiffsFoundException;
 import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
-import com.applitools.eyes.selenium.fluent.Target;
 import com.applitools.eyes.selenium.introspection.Introspect;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -25,7 +26,6 @@ import org.testng.annotations.Test;
 import org.testng.util.Strings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeTest;
@@ -49,9 +49,8 @@ public class ApplitoolsEyesTestNGTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchPrefix = "Eyes Demo: ";
-    private static String appName = "Acme Bank";
-    private static String batchName = batchPrefix + appName;
+    private static final String batchName = "Eyes Demo: Federal Reserve Bank";
+    private static String appName = "Federal Reserve Bank";
     private int browserHeight = 768;
     private int browserWidth = 1024;
 
@@ -63,6 +62,21 @@ public class ApplitoolsEyesTestNGTest {
     private String eyesTestName = "undef";
     private String testngTestName = "";
     private String testSuite = "";
+
+    @BeforeSuite
+    public void beforeSuite(ITestContext ctx) {
+        testSuite = ctx.getSuite().getName();
+        log.info("Before: Suite for {}", testSuite);
+        if (!testSuite.isBlank()) {
+            appName = testSuite.isBlank() ? appName : testSuite;
+        }
+    }
+
+    @BeforeTest
+    public void beforeTest(ITestContext ctx) {
+        testngTestName = ctx.getName();
+        log.info("Before: Test for {}", testngTestName);
+    }
 
     @BeforeClass
     public void beforeClass() {
@@ -128,16 +142,37 @@ public class ApplitoolsEyesTestNGTest {
         log.info("Before: Method for {}", testMethod.getName());
         
         String testName = testngTestName.isBlank() ? testMethod.getName() : testngTestName;
-        eyesTestName = params[2].equals("applibot") ? testName : String.format("%s#%s", testName, params[2]);
 
-        // This method sets up each test with its own ChromeDriver and Applitools Eyes objects.
+        // You can use values supplied by a DataProvider in your test name.
+        //eyesTestName = params[2].equals("applibot") ? testName : String.format("%s#%s", testName, params[2]);
+        eyesTestName = testName;
 
-        // Open the browser with the ChromeDriver instance.
-        // Even though this test will run visual checkpoints on different browsers in the Ultrafast Grid,
-        // it still needs to run the test one time locally to capture snapshots.
-        ChromeOptions opts = new ChromeOptions();
-        if (headless) opts.addArguments("--headless=new");
-        driver = new ChromeDriver(opts);
+        // This method sets up each test with its own Selenium WebDriver and Applitools Eyes objects.
+
+        // Checks whether we will run this test on a local browser or on the Execution Cloud
+        boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
+
+        // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
+        // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
+        // it still needs to run the test one time in a browser to capture snapshots.
+        if (ecx) {
+            // Open the browser remotely in the Execution Cloud.
+            DesiredCapabilities caps = new DesiredCapabilities();
+            caps.setBrowserName("chrome");
+            log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
+            try {
+                this.driver = new RemoteWebDriver(new URL(Eyes.getExecutionCloudURL()), caps);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to connect to the Applitools Self-Healing Execution Cloud at " + Eyes.getExecutionCloudURL(), e);
+            }
+        }
+        else {
+            // Open the browser with a local ChromeDriver instance.
+            ChromeOptions opts = new ChromeOptions();
+            if (headless) opts.addArguments("--headless=new");
+            this.driver = new ChromeDriver(opts);
+            log.info("Eyes tests will execute on your local Chrome browser...");
+        }
 
         // Set the browser window size - height, width
         driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
@@ -180,33 +215,23 @@ public class ApplitoolsEyesTestNGTest {
         log.info("Before: Method for {} - EYES opened", eyesTestName);
      }
 
-    @Test( priority = 10, dataProvider = "loginPairs" )
-    public void loginPageTest(String pageURL, String pageName, String username, String password) {
-        // This test covers login for the Applitools demo site, which is a dummy banking app.
+    // Not using a DataProvider for this example
+    //@Test( priority = 10, dataProvider = "loginPairs" )
+    @Test( priority = 10 )
+    public void testNgWebSiteTest() {
+        // This test covers the Federal Reserve Web site
         // The interactions use typical Selenium WebDriver calls,
         // but the verifications use one-line snapshot calls with Applitools Eyes.
         // If the page ever changes, then Applitools will detect the changes and highlight them in the dashboard.
         // Traditional assertions that scrape the page for text values are not needed here.
 
-        log.info("Running test '{}' getting {}", eyesTestName, pageURL);
+        log.info("Running test '{}'", eyesTestName);
         
-        // Load the login page.
-        driver.get(pageURL);
-
-        // Verify the full login page loaded correctly.
-        eyes.check(Target.window().fully().withName(pageName));
-
-        // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
-
-        // Verify the full main page loaded correctly.
-        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
-        eyes.check(Target.window().fully().withName("Main page"));
+        ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
     }
     
-    @DataProvider
+    // Not using a DataProvider for this example
+    /* @DataProvider
     public Object[][] loginPairs() {
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         String pageURL = forceDiffs ? 
@@ -222,7 +247,7 @@ public class ApplitoolsEyesTestNGTest {
                     pageURL, pageName, "randomuser", "123456"
             }
         };
-    }
+    } */
     
     @AfterMethod
     public void afterMethod(Method testMethod) {
@@ -249,32 +274,17 @@ public class ApplitoolsEyesTestNGTest {
         // Close the batch and report visual differences to the console.
         // Note that it forces TestNG to wait synchronously for all visual checkpoints to complete.
         try {
-            TestResultsSummary allTestResults = runner.getAllTestResults();
+            // The getAllTestResults method will throw a DiffsFoundException if passed true and any test found diffs.
+            TestResultsSummary allTestResults = runner.getAllTestResults(false);
             log.info("RESULTS: {}", allTestResults);
         } catch (DiffsFoundException ex) {
-            
+            log.error("Applitools Eyes tests found differences! {}", ex);
         }
-    }
-
-    @BeforeTest
-    public void beforeTest(ITestContext ctx) {
-        testngTestName = ctx.getName();
-        log.info("Before: Test for {}", testngTestName);
     }
 
     @AfterTest
     public void afterTest(ITestContext ctx) {
         log.info("After:  Test for {}", testngTestName);
-    }
-
-    @BeforeSuite
-    public void beforeSuite(ITestContext ctx) {
-        testSuite = ctx.getSuite().getName();
-        log.info("Before: Suite for {}", testSuite);
-        if (!testSuite.isBlank()) {
-            appName = testSuite.isBlank() ? appName : testSuite;
-            batchName = batchPrefix + appName;
-        }
     }
 
     @AfterSuite

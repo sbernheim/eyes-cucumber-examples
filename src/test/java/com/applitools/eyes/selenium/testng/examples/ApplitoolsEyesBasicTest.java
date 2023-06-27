@@ -1,5 +1,6 @@
 package com.applitools.eyes.selenium.testng.examples;
 
+import java.net.URL;
 import java.time.Duration;
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
@@ -8,14 +9,14 @@ import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
-import com.applitools.eyes.selenium.fluent.Target;
 import com.applitools.eyes.selenium.introspection.Introspect;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -37,27 +38,20 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Acme Bank";
+    private static final String batchName = "Eyes Demo: Federal Reserve Bank";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Acme Bank";
-    private String testName = "Bank Login";
+    private static final String appName = "Federal Reserve Bank of Philadelphia";
+    private String testName = "FRB Philadelphia Menus";
     private int browserHeight = 768;
-    private int browserWidth = 1024;
+    private int browserWidth = 1532;
 
-    // Values used by the test
-    private String pageURL1 = "https://demo.applitools.com";
-    private String pageURL2 = "https://demo.applitools.com/index_v2.html";
-    private String pageURL = pageURL1;
-    private String username = "applibot";
-    private String password = "I<3VisualTests";
-        
     @Test
-    public void loginPageTest() {
+    public void basicWebSiteTest() {
         log.info("Start basic UI test");
 
         // This test covers login for the Applitools demo site, which is a dummy banking app.
@@ -84,7 +78,7 @@ public class ApplitoolsEyesBasicTest {
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
-        pageURL = forceDiffs ? pageURL2 : pageURL1;
+        //pageURL = forceDiffs ? pageURL2 : pageURL1;
 
         // Create the runner 
         runner = new ClassicRunner();
@@ -121,12 +115,30 @@ public class ApplitoolsEyesBasicTest {
         config.setBatch(batch);
         //config.setDisableBrowserFetching(true);
 
-        // Open the browser with the ChromeDriver instance.
-        // Even though this test will run visual checkpoints on different browsers in the Ultrafast Grid,
-        // it still needs to run the test one time locally to capture snapshots.
-        ChromeOptions opts = new ChromeOptions();
-        if (headless) opts.addArguments("--headless=new");
-        driver = new ChromeDriver(opts);
+        // Checks whether we will run this test on a local browser or on the Execution Cloud
+        boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
+
+        // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
+        // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
+        // it still needs to run the test one time in a browser to capture snapshots.
+        if (ecx) {
+            // Open the browser remotely in the Execution Cloud.
+            DesiredCapabilities caps = new DesiredCapabilities();
+            caps.setBrowserName("chrome");
+            log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
+            try {
+                this.driver = new RemoteWebDriver(new URL(Eyes.getExecutionCloudURL()), caps);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to connect to the Applitools Self-Healing Execution Cloud at " + Eyes.getExecutionCloudURL(), e);
+            }
+        }
+        else {
+            // Open the browser with a local ChromeDriver instance.
+            ChromeOptions opts = new ChromeOptions();
+            if (headless) opts.addArguments("--headless=new");
+            this.driver = new ChromeDriver(opts);
+            log.info("Eyes tests will execute on your local Chrome browser...");
+        }
         
         // Set the browser window size - height, width
         driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
@@ -168,33 +180,24 @@ public class ApplitoolsEyesBasicTest {
                           // The viewport size for the local browser - width , height
                 new RectangleSize(browserWidth, browserHeight));
 
-        // Load the login page.
-        driver.get(pageURL);
+        try {
+            ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
+        } catch (Exception e) {
+            log.error("Ending Eyes test due to Exception : {}", e);
+            throw e;
+        } finally {
+            // Close Eyes
+            eyes.closeAsync();
 
-        // Verify the full login page loaded correctly.
-        eyes.check(Target.window().fully().withName("Login page"));
+            // Quit the WebDriver instance.
+            driver.quit();
 
-        // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
+            // Gets results of all the tests AND implicitly closes the Batch
+            TestResultsSummary allTestResults = runner.getAllTestResults();
 
-        // Verify the full main page loaded correctly.
-        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
-        eyes.check(Target.window().fully().withName("Main page"));
-        eyes.check(Target.window().fully().setDisableBrowserFetching(true).withName("Main page"));
-
-        // Close Eyes
-        eyes.closeAsync();
-
-        // Quit the WebDriver instance.
-        driver.quit();
-
-        // Gets results of all the tests AND implicitly closes the Batch
-        TestResultsSummary allTestResults = runner.getAllTestResults();
-
-        log.info("End basic example test");
-        log.info("RESULTS: {}", allTestResults);
+            log.info("End basic example test");
+            log.info("RESULTS: {}", allTestResults);
+        }
     }
 
 }
