@@ -49,8 +49,8 @@ public class ApplitoolsEyesTestNGTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Federal Reserve Bank";
-    private static String appName = "Federal Reserve Bank";
+    private static final String batchName = "Eyes Demo: Capital One";
+    private static String appName = "Capital One";
     private int browserHeight = 768;
     private int browserWidth = 1024;
 
@@ -227,7 +227,7 @@ public class ApplitoolsEyesTestNGTest {
 
         log.info("Running test '{}'", eyesTestName);
         
-        ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
+        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
     }
     
     // Not using a DataProvider for this example

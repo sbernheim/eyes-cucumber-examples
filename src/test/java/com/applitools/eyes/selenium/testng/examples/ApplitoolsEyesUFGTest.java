@@ -57,7 +57,7 @@ public class ApplitoolsEyesUFGTest {
     
     // Eyes Batch meta-data values
     private static final String batchPrefix = "Eyes Demo: ";
-    private static String appName = "Acme Bank";
+    private static String appName = "Capital One";
     private static String batchName = batchPrefix + appName;
     private int browserHeight = 768;
     private int browserWidth = 1024;
@@ -241,7 +241,7 @@ public class ApplitoolsEyesUFGTest {
 
         log.info("Running test '{}'", eyesTestName);
         
-        ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
+        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
     }
     
     // Not using a DataProvider in this example.

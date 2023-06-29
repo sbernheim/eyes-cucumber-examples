@@ -38,17 +38,17 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Federal Reserve Bank";
+    private static final String batchName = "Eyes Demo: Capital One";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Federal Reserve Bank of Philadelphia";
-    private String testName = "FRB Philadelphia Menus";
-    private int browserHeight = 768;
-    private int browserWidth = 1532;
+    private static final String appName = "Capital One";
+    private String testName = "Capital One";
+    private int browserHeight = 600;
+    private int browserWidth = 1024;
 
     @Test
     public void basicWebSiteTest() {
@@ -181,7 +181,7 @@ public class ApplitoolsEyesBasicTest {
                 new RectangleSize(browserWidth, browserHeight));
 
         try {
-            ApplitoolsFederalReserveTest.runTest(driver, eyes, forceDiffs);
+            ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
         } catch (Exception e) {
             log.error("Ending Eyes test due to Exception : {}", e);
             throw e;
