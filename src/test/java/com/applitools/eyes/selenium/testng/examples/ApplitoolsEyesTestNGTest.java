@@ -141,11 +141,11 @@ public class ApplitoolsEyesTestNGTest {
     public void beforeMethod(Method testMethod, Object[] params) {
         log.info("Before: Method for {}", testMethod.getName());
         
-        String testName = testngTestName.isBlank() ? testMethod.getName() : testngTestName;
-
         // You can use values supplied by a DataProvider in your test name.
+        // Not using a DataProvider for this example
+        //String testName = testngTestName.isBlank() ? testMethod.getName() : testngTestName;
         //eyesTestName = params[2].equals("applibot") ? testName : String.format("%s#%s", testName, params[2]);
-        eyesTestName = testName;
+        eyesTestName = (testngTestName.isBlank() || testngTestName.startsWith("Default test")) ? eyesTestName : testngTestName;
 
         // This method sets up each test with its own Selenium WebDriver and Applitools Eyes objects.
 
@@ -271,11 +271,11 @@ public class ApplitoolsEyesTestNGTest {
     public void afterClass() {
          log.info("After:  Class for {}", Introspect.thisClass());
 
-        // Close the batch and report visual differences to the console.
-        // Note that it forces TestNG to wait synchronously for all visual checkpoints to complete.
+        // Call runner.getAllTestResults() to close the batch and report visual differences to the console.
+        // Note that this call forces TestNG to wait synchronously for all visual checkpoints to complete.
         try {
-            // The getAllTestResults method will throw a DiffsFoundException if passed true and any test found diffs.
-            TestResultsSummary allTestResults = runner.getAllTestResults(false);
+            // Pass true to Runner.getAllTestResults(boolean) to throw a DiffsFoundException if any test found diffs.
+            TestResultsSummary allTestResults = runner.getAllTestResults(true);
             log.info("RESULTS: {}", allTestResults);
         } catch (DiffsFoundException ex) {
             log.error("Applitools Eyes tests found differences! {}", ex);

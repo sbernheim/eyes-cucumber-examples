@@ -192,12 +192,12 @@ public class ApplitoolsEyesBasicTest {
             // Quit the WebDriver instance.
             driver.quit();
 
-            // Gets results of all the tests AND implicitly closes the Batch
-            TestResultsSummary allTestResults = runner.getAllTestResults();
-
-            log.info("End basic example test");
-            log.info("RESULTS: {}", allTestResults);
         }
+        // Gets results of all the tests AND implicitly closes the Batch
+        TestResultsSummary allTestResults = runner.getAllTestResults(false); // pass true to throw DiffsFoundException when diffs are found!
+
+        log.info("End basic example test");
+        log.info("RESULTS: {}", allTestResults);
     }
 
 }
