@@ -42,6 +42,7 @@ public class ApplitoolsEyesTestNGTest {
     private static boolean headless;
     private static boolean eyesIsDisabled;
     private static boolean forceDiffs;
+    private static boolean logTestResults;
 
     // Applitools Eyes Context objects - shared for all tests
     private static BatchInfo batch;
@@ -276,7 +277,14 @@ public class ApplitoolsEyesTestNGTest {
         try {
             // Pass true to Runner.getAllTestResults(boolean) to throw a DiffsFoundException if any test found diffs.
             TestResultsSummary allTestResults = runner.getAllTestResults(true);
-            log.info("RESULTS: {}", allTestResults);
+
+            logTestResults = Boolean.parseBoolean(System.getenv().getOrDefault("LOG_DETAILED_TEST_RESULTS", "false"));
+            if (logTestResults) {
+                ApplitoolsWebSiteTest.logTestResults(allTestResults);
+            } else {
+                log.info("RESULTS: {}", allTestResults);
+            }
+            
         } catch (DiffsFoundException ex) {
             log.error("Applitools Eyes tests found differences! {}", ex);
         }

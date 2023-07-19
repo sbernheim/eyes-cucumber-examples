@@ -2,19 +2,10 @@ package com.applitools.eyes.selenium.testng.examples;
 
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Calendar;
-
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.RectangleSize;
-import com.applitools.eyes.SessionUrls;
-import com.applitools.eyes.StepInfo;
-import com.applitools.eyes.StepInfo.AppUrls;
-import com.applitools.eyes.TestResultContainer;
-import com.applitools.eyes.TestResults;
-import com.applitools.eyes.TestResultsStatus;
 import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.exceptions.DiffsFoundException;
 import com.applitools.eyes.selenium.BrowserType;
@@ -22,10 +13,8 @@ import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.introspection.Introspect;
 import com.applitools.eyes.visualgrid.model.DeviceName;
-import com.applitools.eyes.visualgrid.model.EmulationBaseInfo;
 import com.applitools.eyes.visualgrid.model.IosDeviceInfo;
 import com.applitools.eyes.visualgrid.model.IosDeviceName;
-import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
 import com.applitools.eyes.visualgrid.model.ScreenOrientation;
 import com.applitools.eyes.visualgrid.services.RunnerOptions;
 import com.applitools.eyes.visualgrid.services.VisualGridRunner;
@@ -59,6 +48,7 @@ public class ApplitoolsEyesUFGTest {
     private static boolean headless;
     private static boolean eyesIsDisabled;
     private static boolean forceDiffs;
+    private static boolean logTestResults;
     private static int concurrency = 1;
 
     // Applitools Eyes Context objects - shared for all tests
@@ -318,111 +308,14 @@ public class ApplitoolsEyesUFGTest {
         try {
             // Pass true to Runner.getAllTestResults(boolean) to throw a DiffsFoundException if any test found diffs.
             TestResultsSummary allTestResults = runner.getAllTestResults(false);
-            log.info("RESULTS: {}", allTestResults);
-            
-            // You can also traverse the array of TestResultContainer objects in the TestResultsSummary for detailed
-            // information about the results of each test launched by this Runner.
-            String currentBatchId = "";
-            for (TestResultContainer resultContainer : allTestResults.getAllResults()) {
-                TestResults results = resultContainer.getTestResults(); // A single test result containing multiple step results
 
-                String batchId = results.getBatchId();
-                String batchName = results.getBatchName();
-                String branchName = results.getBranchName(); // Will be "default" unless your test set a batch name
-                SessionUrls testLinks = results.getAppUrls();
-
-                if (currentBatchId.equals(batchId)) {
-                    currentBatchId = batchId;
-                    log.info("Batch '{}' for baseline branch '{}' [{}]", batchName, branchName, batchId);
-                    if (testLinks != null) {
-                        log.info("link to batch : {}", testLinks.getBatch());
-                    }
-                }
-
-                String appName = results.getAppName();
-                String testName = results.getName();
-                String hostApp = results.getHostApp();
-                String hostOS = results.getHostOS();
-                RectangleSize hostSize = results.getHostDisplaySize();
-                String device = "DESKTOP";
-                Calendar startedAtCal = results.getStartedAt();
-                String startedAt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a z").format(startedAtCal.getTime());
-                TestResultsStatus testStatus = results.getStatus(); // An enum with Passed, Unresolved, Failed and NotOpened values
-                boolean isPassed = results.isPassed();
-                boolean isNew = results.isNew();
-                boolean isDifferent = results.isDifferent();
-                boolean isAborted = results.isAborted();
-                int durationInSeconds = results.getDuration();
-                log.info("    {} : App '{}' Test '{}' on '{}' '{}' at [{}]", 
-                        testStatus, appName, testName, hostOS, hostApp, hostSize);
-                log.info("        started at '{}' runtime {} seconds", 
-                        startedAt, durationInSeconds);
-
-                RenderBrowserInfo browserInfo = resultContainer.getBrowserInfo(); // Info on how this test was rendered in the UFG
-                if (browserInfo != null) {
-                    BrowserType browser = browserInfo.getBrowserType(); // An enum with values for all the Browsers supported by the UFG
-                    int height = browserInfo.getHeight();
-                    int width = browserInfo.getWidth();
-                    RectangleSize viewportSize = browserInfo.getViewportSize(); 
-                    RectangleSize deviceSize = browserInfo.getDeviceSize();
-                    String platform = browserInfo.getPlatform();
-                    String renderInfo = String.format("%s %s at [h %d x w %d]", 
-                            platform, browser.getName(), height, width);
-
-                    EmulationBaseInfo chromeEmulationInfo = browserInfo.getEmulationInfo();
-                    IosDeviceInfo iosDeviceInfo = browserInfo.getIosDeviceInfo();
-                    if (chromeEmulationInfo != null) {
-                        device = String.format("%s in %s mode emulated by Chrome", chromeEmulationInfo.getDeviceName(), chromeEmulationInfo.getScreenOrientation());
-                    } else if (iosDeviceInfo != null) {
-                        device = String.format("%s in %s mode as an emulated iOS device", iosDeviceInfo.getDeviceName(), iosDeviceInfo.getScreenOrientation());
-                    }
-
-                    log.info("        rendered on '{}' deviceSize [{}] viewportSize [{}] with '{}'", device, deviceSize, viewportSize, renderInfo);
-                    
-                    String baselineEnvName = browserInfo.getBaselineEnvName();
-                    if (baselineEnvName != null && !baselineEnvName.isBlank()) {
-                        log.info("        compared to named environment '{}'", baselineEnvName);
-                    }
-                }
-
-                if (testLinks != null) {
-                    log.info("        link to test  : {}", testLinks.getSession());
-                }
-                
-                if (isAborted) {
-                    log.warn("         NOTE: THIS TEST WAS ABORTED BEFORE COMPLETION!");
-                } else if (isNew) {
-                    log.info("        This is a NEW test!");
-                } else if (isPassed) {
-                    log.info("        This test passed!");
-                } else if (isDifferent) {
-                    log.info("        This test found differences!");
-                }
-
-                int stepsCount = results.getSteps();
-                int stepsMatched = results.getMatches();
-                int stepsMatchedExactly = results.getExactMatches();
-                int stepsMismatched = results.getMismatches();
-                int stepsMissing = results.getMissing();
-                log.info("        {} of {} steps matched ({} exactly), {} had differences, and {} were missing", 
-                        stepsMatched, stepsCount, stepsMatchedExactly, stepsMismatched, stepsMissing);
-                
-                int stepNumber = 0;
-                for (StepInfo step : results.getStepsInfo()) {
-                    String stepResult = step.getIsDifferent() ? "found differences" : "matched the baseline";
-                    if (!step.getHasBaselineImage()) stepResult = isNew ? "is a new step" : "did not have a baseline image";
-                    if (!step.getHasCurrentImage()) stepResult = "did not have a checkpoint image";
-                    log.info("        step {} of {} {}", ++stepNumber, stepsCount, stepResult);
-                    AppUrls stepLinks = step.getAppUrls();
-                    if (stepLinks != null) {
-                        log.info("            link to view step : {}", stepLinks.getStep());
-                        log.info("            link to edit step : {}", stepLinks.getStepEditor());
-                    }
-                }
-
-                Throwable testException = resultContainer.getException(); // Should be null if there was no Exception
-                if (testException != null) log.info("        exception thrown:", testException);
+            logTestResults = Boolean.parseBoolean(System.getenv().getOrDefault("LOG_DETAILED_TEST_RESULTS", "false"));
+            if (logTestResults) {
+                ApplitoolsWebSiteTest.logTestResults(allTestResults);
+            } else {
+                log.info("RESULTS: {}", allTestResults);
             }
+            
         } catch (DiffsFoundException ex) {
             log.error("Applitools Eyes tests found differences! {}", ex);
         }

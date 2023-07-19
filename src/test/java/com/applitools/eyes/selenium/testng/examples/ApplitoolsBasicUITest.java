@@ -9,6 +9,7 @@ import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.TestResultsSummary;
+import com.applitools.eyes.exceptions.DiffsFoundException;
 import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
@@ -38,6 +39,7 @@ public class ApplitoolsBasicUITest {
     private static boolean headless;
     //private static boolean eyesIsDisabled;
     private static boolean forceDiffs;
+    private static boolean logTestResults;
 
     // Applitools Eyes Context objects - shared for all tests
     private static BatchInfo batch;
@@ -124,7 +126,6 @@ public class ApplitoolsBasicUITest {
         log.info("End BeforeSuite");
     }
 
-    @Ignore
     @Test
     public void basicUiWebSiteTest() {
         log.info("Start basic Eyes Execution Cloud test");
@@ -208,15 +209,26 @@ public class ApplitoolsBasicUITest {
             // Quit the WebDriver instance.
             driver.quit();
             
+        }
+        
+        try {
             // Gets results of all the tests AND implicitly closes the Batch
             TestResultsSummary allTestResults = runner.getAllTestResults(false);
             
-            log.info("End basic Eyes Execution Cloud test");
-            log.info("RESULTS: {}", allTestResults);
+            logTestResults = Boolean.parseBoolean(System.getenv().getOrDefault("LOG_DETAILED_TEST_RESULTS", "false"));
+            if (logTestResults) {
+                ApplitoolsWebSiteTest.logTestResults(allTestResults);
+            } else {
+                log.info("RESULTS: {}", allTestResults);
+            }
+        } catch (DiffsFoundException ex) {
+            log.error("Applitools Eyes tests found differences! {}", ex);
         }
 
+        log.info("End basic Eyes Execution Cloud test");
     }
     
+    @Ignore
     @Test
     public void nonEyesTest() {
         log.info("Start non-eyes test");
