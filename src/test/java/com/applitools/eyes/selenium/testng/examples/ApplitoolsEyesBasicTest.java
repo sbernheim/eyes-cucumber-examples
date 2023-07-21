@@ -40,15 +40,15 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
+    private static final String batchName = "Eyes Demo: PWC";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Capital One";
-    private String testName = "Capital One";
+    private static final String appName = "PWC";
+    private String testName = "PWC Main Site";
     private int browserHeight = 600;
     private int browserWidth = 1024;
 

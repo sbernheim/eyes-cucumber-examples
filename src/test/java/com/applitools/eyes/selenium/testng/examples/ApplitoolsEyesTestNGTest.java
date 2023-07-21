@@ -50,8 +50,8 @@ public class ApplitoolsEyesTestNGTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
-    private static String appName = "Capital One";
+    private static final String batchName = "Eyes Demo: PWC";
+    private static String appName = "PWC";
     private int browserHeight = 768;
     private int browserWidth = 1024;
 

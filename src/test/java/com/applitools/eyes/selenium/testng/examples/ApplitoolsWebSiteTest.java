@@ -1,14 +1,23 @@
 package com.applitools.eyes.selenium.testng.examples;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.SessionUrls;
@@ -30,14 +39,16 @@ import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
 public class ApplitoolsWebSiteTest {
     private static final Logger log = LoggerFactory.getLogger(Introspect.thisClass());
     
-    private static final String pageURL = "https://www.capitalone.com/";
+    private static final String pageURL = "https://www.pwc.com/";
     
     public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs) {
         // Load the login page.
         driver.get(pageURL);
+        log.info("Loading Site: {}", pageURL);
         
+        String footerSelector = "div.glb-footer";
         // Get the text of the footer.
-        String footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
+        String footerText = driver.findElement(By.cssSelector(footerSelector)).getText();
         log.trace("Found Footer: {}", footerText);
             
         if (forceDiffs) {
@@ -45,33 +56,73 @@ public class ApplitoolsWebSiteTest {
         }
         
         // Verify the full login page loaded correctly.
-        if (eyes != null) eyes.check(Target.window().fully().stitchOverlap(500).layoutBreakpoints(true).lazyLoad().withName("Main Page"));
+        if (eyes != null) {
+            eyes.check(Target.window()
+                    .fully()
+                    .stitchOverlap(500)
+                    .layoutBreakpoints(true)
+                    .lazyLoad()
+                    .layout(By.cssSelector("div.multi-featured-item__block"), By.cssSelector("div[ng-controller^=ContentListController]"))
+                    .withName("Main Page"));
+        }
         
-        String linkCSSSelector = "div#siteHeaderContainer";
-        By linkLocator = By.cssSelector(linkCSSSelector);
+        // Find all the main links in the footer
+        String footerLinkBlockSelector = "div.glb-footer__block";
+        WebElement footerLinkBlock = driver.findElement(By.cssSelector(footerLinkBlockSelector));
+        String footerLinkSelector = "a.glb-footer__link";
+        List<WebElement> footerLinkElements = footerLinkBlock.findElements(By.cssSelector(footerLinkSelector));
+        //List<String> footerLinks = footerLinkElements.stream().map(WebElement::getText).toList();
+        //footerLinkElements.toArray(new WebElement[footerLinkElements.size()]);
+        List<String> footerLinks = new ArrayList<String>(footerLinkElements.size());
+        for (WebElement footerLinkElement : footerLinkElements) {
+            log.info("Found footer link '{}'", footerLinkElement.getText());
+            footerLinks.add(footerLinkElement.getText());
+        }
         
-        SeleniumCheckSettings checkSettings = Target.window().fully().stitchOverlap(500).layoutBreakpoints(true).lazyLoad();
-
-        // Perform an action.
-        driver.findElement(linkLocator).findElement(By.partialLinkText("Credit Cards")).click();
-
-        // Get the text of the footer.
-        footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
-        log.trace("Found Footer: {}", footerText);
+        SeleniumCheckSettings checkSettings = Target.window().fully()
+                .stitchOverlap(500)
+                .layoutBreakpoints(true)
+                .lazyLoad()
+                .layout(By.cssSelector("div[ng-controller^=ContentListController]"), By.cssSelector("div.feature-content__row"));
         
-        // Find all the shared article elements and add Layout regions to cover them!
-        log.info("Finding shared article tiles");
-        List<WebElement> tiles = driver.findElements(By.cssSelector("div.grv-row:nth-child(2) div.grv-card"));
-        log.info("Found {} tiles", tiles.size());
-        for (int x = 1; x <= tiles.size(); x++) {
-            String cardSelector = String.format("div.grv-row:nth-child(2) ul li:nth-child(%d) div.grv-card", x);
-            log.info("Adding coded layout region for '{}'", cardSelector);
-            checkSettings = checkSettings.layout(By.cssSelector(cardSelector));
+        // Start with the set of handles for all windows/tabs currently open in the browser
+        Set<String> windowHandles = driver.getWindowHandles();
+        for (String windowHandle : windowHandles) {
+            log.info("Found open window '{}'", windowHandle);
         }
 
-        log.info("Checking 'Credit Cards'");
-        if (eyes != null) eyes.check(checkSettings.withName("Credit Cards"));
-            
+        for (String footerLink : footerLinks) {
+            // Find the next footer link and check that the text matches (a functional assertion for non-eyes tests)
+            String foundLinkText = driver.findElement(By.cssSelector(footerLinkBlockSelector)).findElement(By.partialLinkText(footerLink)).getText();
+            Assert.assertEquals(footerLink, foundLinkText, "footer link text does not match!");
+            log.info("Found link for '{}'", foundLinkText);
+
+            WebElement linkElement = driver.findElement(By.cssSelector(footerLinkBlockSelector)).findElement(By.partialLinkText(footerLink));
+            String linkTarget = linkElement.getAttribute("target");
+            log.info("Clicking link for '{}'", footerLink);
+            driver.findElement(By.cssSelector(footerLinkBlockSelector)).findElement(By.partialLinkText(footerLink)).click();
+            if (!(linkTarget == null || linkTarget.isBlank())) {
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+                wait.until(ExpectedConditions.numberOfWindowsToBe(windowHandles.size() + 1));
+                Set<String> newWindowHandles = driver.getWindowHandles();
+                newWindowHandles.stream()
+                        .filter(h -> { return !windowHandles.contains(h); })
+                        .findFirst()
+                        .ifPresent(h -> {
+                            log.info("Switching to new window '{}'", h);
+                            windowHandles.add(h);
+                            driver.switchTo().window(h);
+                        });
+            }
+
+            // Get the text of the footer.
+            footerText = driver.findElement(By.cssSelector("div.glb-footer")).getText();
+            log.trace("Found Footer: {}", footerText);
+
+            log.info("Checking page for '{}'", footerLink);
+            if (eyes != null) eyes.check(checkSettings.withName(footerLink));
+        }
+        
     }
     
     public static void logTestResults(TestResultsSummary allTestResults) {

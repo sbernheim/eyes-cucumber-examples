@@ -1,8 +1,8 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Capital One">
-   <test name="Capital One">
+<suite name="PWC">
+   <test name="PWC Main Site">
       <classes>
          <class name="com.applitools.eyes.selenium.testng.examples.ApplitoolsEyesUFGTest"/>
       </classes>

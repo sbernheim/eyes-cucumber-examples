@@ -47,15 +47,15 @@ public class ApplitoolsBasicUITest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
+    private static final String batchName = "Eyes Demo: PWC";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Capital One";
-    private String testName = "Capital One";
+    private static final String appName = "PWC";
+    private String testName = "PWC Main Site";
     private int browserHeight = 768;
     private int browserWidth = 1024;
 
@@ -74,7 +74,8 @@ public class ApplitoolsBasicUITest {
         // https://applitools.com/tutorials/getting-started/setting-up-your-environment.html
         //
         // NOTE: this is not strictly required when using the eyes-selenium-java5 SDK.
-        //applitoolsApiKey = System.getenv("APPLITOOLS_API_KEY");
+        String applitoolsApiKey = System.getenv("APPLITOOLS_API_KEY");
+        log.info("API KEY: {}", applitoolsApiKey);
         
         eyesServerUrl = System.getenv("APPLITOOLS_SERVER_URL");
 
@@ -291,15 +292,15 @@ public class ApplitoolsBasicUITest {
                                                 )
                                         )*/
                                 )
-                        /*),
+                        )/*,
                         en("properties",
                                 Map.ofEntries(
                                         en("Function", "Login"),
                                         en("Letter", "B"),
                                         en("Number", "2"),
                                         en("Boolean", "false")
-                                )*/
-                        )
+                                )
+                        )*/
                 )
          );
 

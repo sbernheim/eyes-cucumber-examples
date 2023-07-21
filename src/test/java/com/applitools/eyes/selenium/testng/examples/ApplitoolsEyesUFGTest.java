@@ -58,7 +58,7 @@ public class ApplitoolsEyesUFGTest {
     
     // Eyes Batch meta-data values
     private static final String batchPrefix = "Eyes Demo: ";
-    private static String appName = "Capital One";
+    private static String appName = "PWC";
     private static String batchName = batchPrefix + appName;
     private int browserHeight = 768;
     private int browserWidth = 1024;
@@ -68,7 +68,7 @@ public class ApplitoolsEyesUFGTest {
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private String eyesTestName = "Capital One";
+    private String eyesTestName = "PWC Main Site";
     private String testngTestName = "";
     private String testSuite = "";
 
