@@ -8,12 +8,15 @@ import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
+import com.applitools.eyes.selenium.StitchMode;
 import com.applitools.eyes.selenium.fluent.Target;
 import com.applitools.eyes.selenium.introspection.Introspect;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
@@ -37,22 +40,24 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Acme Bank";
+    private static final String batchName = "Repro: Quest Diagnostics Grey Bars";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Acme Bank";
-    private String testName = "Bank Login";
-    private int browserHeight = 768;
-    private int browserWidth = 1024;
+    private static final String appName = "Lab Report";
+    private String testName = "Lab Report Analyte Card";
+    //private int browserHeight = 768;
+    //private int browserWidth = 1024;
+    private int browserHeight = 600;
+    private int browserWidth = 1200;
 
     // Values used by the test
     private String pageURL1 = "https://demo.applitools.com";
     private String pageURL2 = "https://demo.applitools.com/index_v2.html";
-    private String pageURL = pageURL1;
+    private String pageURL = "http://localhost:8080/Lab%20Result.html";
     private String username = "applibot";
     private String password = "I<3VisualTests";
         
@@ -84,7 +89,7 @@ public class ApplitoolsEyesBasicTest {
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
-        pageURL = forceDiffs ? pageURL2 : pageURL1;
+        //pageURL = forceDiffs ? pageURL2 : pageURL1;
 
         // Create the runner 
         runner = new ClassicRunner();
@@ -106,6 +111,7 @@ public class ApplitoolsEyesBasicTest {
         // Create a configuration for Applitools Eyes.
         //System.out.printf("Before: Class for %s - APPLITOOLS creating config\n", this.getClass().getSimpleName());
         config = new Configuration();
+        config.setStitchMode(StitchMode.SCROLL);
 
         if (Strings.isNotNullAndNotEmpty(eyesServerUrl)) {
             //log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
@@ -172,17 +178,24 @@ public class ApplitoolsEyesBasicTest {
         driver.get(pageURL);
 
         // Verify the full login page loaded correctly.
-        eyes.check(Target.window().fully().withName("Login page"));
+        eyes.check(Target.window().fully().withName("Main Lab Report"));
 
         // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
+        /*driver.findElement(By.id("username")).sendKeys(username);
         driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
+        driver.findElement(By.id("log-in")).click();*/
 
         // Verify the full main page loaded correctly.
-        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
-        eyes.check(Target.window().fully().withName("Main page"));
-        eyes.check(Target.window().fully().setDisableBrowserFetching(true).withName("Main page"));
+        WebElement scrollable = driver.findElement(By.cssSelector("#cit-column-report-detail-profile-0"));
+
+        JavascriptExecutor jsexec = (JavascriptExecutor) driver;
+        jsexec.executeScript("document.querySelector(\"#cit-scroll-to-top-control\").style.visibility = \"hidden\"");
+
+        eyes.check(Target.region(By.cssSelector("#cit-column-report-detail-profile-0")).fully().stitchMode(StitchMode.CSS).withName("Analyte Cards CSS"));
+
+        eyes.check(Target.region(By.cssSelector("#cit-column-report-detail-profile-0")).fully().stitchMode(StitchMode.SCROLL).withName("Analyte Cards Scroll"));
+        
+        eyes.check(Target.region(By.cssSelector("#singleanalyte-HEALTHQUOTIENTHQSUCCESS > div.qd-results-panel__content.col-md-12")).scrollRootElement(By.cssSelector("#cit-column-report-detail-profile-0")).fully().withName("Health Quotient Score Card"));
 
         // Close Eyes
         eyes.closeAsync();

@@ -9,7 +9,7 @@
   <properties>
     <maven.compiler.source>18</maven.compiler.source>
     <maven.compiler.target>18</maven.compiler.target>
-    <eyes.version>5.55.0</eyes.version>
+    <eyes.version>5.63.4</eyes.version>
     <testng.version>7.7.1</testng.version>
     <cucumber.version>7.11.0</cucumber.version>
     <cucumber.filter.tags>@all</cucumber.filter.tags>
@@ -26,7 +26,9 @@
   <dependencies>
     <dependency>
       <groupId>com.applitools</groupId>
+      <!-- artifactId>eyes-selenium-java3</artifactId -->
       <artifactId>eyes-selenium-java5</artifactId>
+      <!-- version>3.213.0</version -->
       <version>${eyes.version}</version>
     </dependency>
     <dependency>
