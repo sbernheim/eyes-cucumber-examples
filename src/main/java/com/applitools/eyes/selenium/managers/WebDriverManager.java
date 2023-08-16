@@ -5,11 +5,12 @@ import static com.applitools.eyes.selenium.introspection.Introspect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Window;
-import org.openqa.selenium.WindowType;
+//import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -69,17 +70,18 @@ public class WebDriverManager {
          * 
          * The following call works for Selenium 4:
          */
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(settings.implicitWaitSeconds));
+        //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(settings.implicitWaitSeconds));
 
         /* If you are using Selenium 3, use the following call instead:
          */
-        //driver.manage().timeouts().implicitlyWait(settings.implicitWaitSeconds, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(settings.implicitWaitSeconds, TimeUnit.SECONDS);
     }
     
     // Return the Applitools Self-Healing Execution Cloud URL or throw a RuntimeException
     private URL applitoolsExecutionCloudURL() {
         try {
-            return new URL(Eyes.getExecutionCloudURL());
+            //return new URL(Eyes.getExecutionCloudURL());
+            return new URL("https://www.fanniemae.com");
         } catch (MalformedURLException e) {
             throw new RuntimeException("Failed to parse Applitools Execution Cloud URL!", e);
         }
@@ -89,14 +91,14 @@ public class WebDriverManager {
      * Opens a new browser window in the web driver session.
      */
     public void openWindow() {
-        driver.switchTo().newWindow(WindowType.WINDOW);
+        //driver.switchTo().newWindow(WindowType.WINDOW);
     }
 
     /*
      * Opens a new tab in the current browser window.
      */
     public void openTab() {
-        driver.switchTo().newWindow(WindowType.TAB);
+        //driver.switchTo().newWindow(WindowType.TAB);
     }
 
     /*

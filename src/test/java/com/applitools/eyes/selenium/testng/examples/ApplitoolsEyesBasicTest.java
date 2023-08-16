@@ -2,6 +2,8 @@ package com.applitools.eyes.selenium.testng.examples;
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.RectangleSize;
@@ -11,6 +13,7 @@ import com.applitools.eyes.selenium.ClassicRunner;
 import com.applitools.eyes.selenium.Configuration;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.selenium.introspection.Introspect;
+import com.google.common.base.Strings;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
@@ -21,7 +24,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
-import org.testng.util.Strings;
 
 public class ApplitoolsEyesBasicTest {
     private static final Logger log = LoggerFactory.getLogger(Introspect.thisClass());
@@ -102,9 +104,9 @@ public class ApplitoolsEyesBasicTest {
         //System.out.printf("Before: Class for %s - APPLITOOLS creating config\n", this.getClass().getSimpleName());
         config = new Configuration();
 
-        if (Strings.isNotNullAndNotEmpty(eyesServerUrl)) {
-            //log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
-            //config.setServerUrl(eyesServerUrl);
+        if (!Strings.isNullOrEmpty(eyesServerUrl)) {
+            log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
+            config.setServerUrl(eyesServerUrl);
         }
 
         // Set the Applitools API key so test results are uploaded to your account.
@@ -122,24 +124,24 @@ public class ApplitoolsEyesBasicTest {
         // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
         // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
         // it still needs to run the test one time in a browser to capture snapshots.
-        if (ecx) {
+        //if (ecx) {
             // Open the browser remotely in the Execution Cloud.
-            DesiredCapabilities caps = new DesiredCapabilities();
+            /*DesiredCapabilities caps = new DesiredCapabilities();
             caps.setBrowserName("chrome");
             log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
             try {
                 this.driver = new RemoteWebDriver(new URL(Eyes.getExecutionCloudURL()), caps);
             } catch (Exception e) {
                 throw new RuntimeException("Unable to connect to the Applitools Self-Healing Execution Cloud at " + Eyes.getExecutionCloudURL(), e);
-            }
-        }
-        else {
+            }*/
+        //}
+        //else {
             // Open the browser with a local ChromeDriver instance.
             ChromeOptions opts = new ChromeOptions();
             if (headless) opts.addArguments("--headless=new");
             this.driver = new ChromeDriver(opts);
             log.info("Eyes tests will execute on your local Chrome browser...");
-        }
+        //}
         
         // Set the browser window size - height, width
         driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
@@ -148,10 +150,10 @@ public class ApplitoolsEyesBasicTest {
         // For larger projects, use explicit waits for better control.
         // https://www.selenium.dev/documentation/webdriver/waits/
         // The following call works for Selenium 4:
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         // If you are using Selenium 3, use the following call instead:
-        //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         // Create the Applitools Eyes object connected to the Runner and set its configuration.
         eyes = new Eyes(runner);

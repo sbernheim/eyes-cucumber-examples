@@ -6,7 +6,6 @@ import static org.testng.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.applitools.eyes.options.LayoutBreakpointsOptions;
 import com.applitools.eyes.selenium.cucumber.heroku.internet.steps.pageapi.HasAlertsPage;
 import com.applitools.eyes.selenium.cucumber.heroku.internet.steps.pageapi.HerokuInternetSite;
 import com.applitools.eyes.selenium.fluent.Target;
@@ -64,7 +63,7 @@ public class CommonHerokuSteps extends PageTest {
     @Then("check the {string} page for all layout breakpoints")
     public void checkWithEyesLayoutBreakpoints(String step) {
         log.info("Thread ID [{}] checking the page for step '{}'", getThreadId(), step);
-        eyesManager.eyes().check(Target.window().layoutBreakpoints(new LayoutBreakpointsOptions().breakpoints(true).reload()).withName(step));
+        eyesManager.eyes().check(Target.window().layoutBreakpoints(true).withName(step));
         log.info("Thread ID [{}] checking the page for step '{}'", getThreadId(), step);
     }
 

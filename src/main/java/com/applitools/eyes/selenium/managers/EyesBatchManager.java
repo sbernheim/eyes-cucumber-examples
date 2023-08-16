@@ -160,10 +160,11 @@ public class EyesBatchManager {
             config.setServerUrl(settings.serverUrl.get());
         }
 
-        if (settings.isDisabled) {
+        // Configuration setIdDisabled is not defined for ESJ3
+        /*if (settings.isDisabled) {
             config.setIsDisabled(true);
             log.info("Thread ID [{}]--> EYES BATCH \n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", getThreadId(), settings.isDisabled);
-        }
+        }*/
 
         // Set the batch for the config.
         config.setBatch(batchInfo());
@@ -207,14 +208,14 @@ public class EyesBatchManager {
         if (settings.mobileBaselineEnvironment.isNotBlank()) {
             String mobileBaselineEnvName = settings.mobileBaselineEnvironment.get();
             log.info("Using mobile baseline environment {}", mobileBaselineEnvName);
-            config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
+            //config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
             config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
             config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
             config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE, mobileBaselineEnvName);
             config.addDeviceEmulation(DeviceName.OnePlus_7T, ScreenOrientation.LANDSCAPE, mobileBaselineEnvName);
             //config.addDeviceEmulation(DeviceName.Kindle_Fire_HDX, ScreenOrientation.PORTRAIT, mobileBaselineEnvName);
         } else {
-            config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT); // I think this is the "mobile-browser" baseline
+            //config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT); // I think this is the "mobile-browser" baseline
             config.addDeviceEmulation(DeviceName.iPad_Pro, ScreenOrientation.PORTRAIT);
             config.addDeviceEmulation(DeviceName.iPhone_11_Pro, ScreenOrientation.PORTRAIT);
             config.addDeviceEmulation(DeviceName.Pixel_4_XL, ScreenOrientation.LANDSCAPE);

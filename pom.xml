@@ -9,12 +9,12 @@
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <eyes.version>5.63.0</eyes.version>
-    <testng.version>7.7.1</testng.version>
-    <cucumber.version>7.11.0</cucumber.version>
+    <eyes.version>3.206.0</eyes.version>
+    <testng.version>6.1.1</testng.version>
+    <cucumber.version>7.11.2</cucumber.version>
     <cucumber.filter.tags>@all</cucumber.filter.tags>
-    <slf4j.version>2.0.6</slf4j.version>
-    <apache.commons.version>3.12.0</apache.commons.version>
+    <slf4j.version>2.0.7</slf4j.version>
+    <apache.commons.version>3.13.0</apache.commons.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Set this to where Chromedriver is installed on your system! -->
@@ -26,8 +26,20 @@
   <dependencies>
     <dependency>
       <groupId>com.applitools</groupId>
-      <artifactId>eyes-selenium-java5</artifactId>
+      <artifactId>eyes-selenium-java3</artifactId>
       <version>${eyes.version}</version>
+      <!-- exclusions>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-api</artifactId>
+        </exclusion>
+        <exclusion>
+        </exclusion>
+      </exclusions -->
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
