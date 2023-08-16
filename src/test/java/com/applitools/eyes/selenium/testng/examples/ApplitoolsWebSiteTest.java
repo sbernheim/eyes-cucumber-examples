@@ -30,48 +30,35 @@ import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
 public class ApplitoolsWebSiteTest {
     private static final Logger log = LoggerFactory.getLogger(Introspect.thisClass());
     
-    private static final String pageURL = "https://www.capitalone.com/";
+    private static final String pageURLDiffs = "https://demo.applitools.com/index_v2.html";
+    private static final String pageURL = "https://demo.applitools.com";
     
-    public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs) {
+    private static final String defaultUsername = "applibot";
+    private static final String defaultPassword =  "I<3VisualTests";
+    
+    public static void runSingleTest(WebDriver driver, Eyes eyes, boolean forceDiffs) {
+        runTest(driver, eyes, forceDiffs, defaultUsername, defaultPassword);
+    }
+
+    public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs, String username, String password) {
         // Load the login page.
-        driver.get(pageURL);
+        driver.get(forceDiffs ? pageURL : pageURLDiffs);
         
         // Get the text of the footer.
         String footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
         log.trace("Found Footer: {}", footerText);
             
-        if (forceDiffs) {
-            // TODO: Inject some JavaScript to create arbitrary diffs on the page!
-        }
-        
         // Verify the full login page loaded correctly.
-        if (eyes != null) eyes.check(Target.window().fully().stitchOverlap(500).layoutBreakpoints(true).lazyLoad().withName("Main Page"));
-        
-        String linkCSSSelector = "div#siteHeaderContainer";
-        By linkLocator = By.cssSelector(linkCSSSelector);
-        
-        SeleniumCheckSettings checkSettings = Target.window().fully().stitchOverlap(500).layoutBreakpoints(true).lazyLoad();
+        if (eyes != null) eyes.check(Target.window().fully().withName("Login page"));
 
-        // Perform an action.
-        driver.findElement(linkLocator).findElement(By.partialLinkText("Credit Cards")).click();
+        // Perform login.
+        driver.findElement(By.id("username")).sendKeys(username);
+        driver.findElement(By.id("password")).sendKeys(password);
+        driver.findElement(By.id("log-in")).click();
 
-        // Get the text of the footer.
-        footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
-        log.trace("Found Footer: {}", footerText);
-        
-        // Find all the shared article elements and add Layout regions to cover them!
-        log.info("Finding shared article tiles");
-        List<WebElement> tiles = driver.findElements(By.cssSelector("div.grv-row:nth-child(2) div.grv-card"));
-        log.info("Found {} tiles", tiles.size());
-        for (int x = 1; x <= tiles.size(); x++) {
-            String cardSelector = String.format("div.grv-row:nth-child(2) ul li:nth-child(%d) div.grv-card", x);
-            log.info("Adding coded layout region for '{}'", cardSelector);
-            checkSettings = checkSettings.layout(By.cssSelector(cardSelector));
-        }
-
-        log.info("Checking 'Credit Cards'");
-        if (eyes != null) eyes.check(checkSettings.withName("Credit Cards"));
-            
+        // Verify the full main page loaded correctly.
+        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
+        if (eyes != null) eyes.check(Target.window().fully().withName("Main page"));
     }
     
     public static void logTestResults(TestResultsSummary allTestResults) {

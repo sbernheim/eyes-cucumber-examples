@@ -35,6 +35,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.AfterSuite;
@@ -247,10 +248,8 @@ public class ApplitoolsEyesUFGTest {
         log.info("Before: Method for {} - EYES opened", eyesTestName);
      }
 
-    // Not using a DataProvider for this example
-    // @Test( priority = 10, dataProvider = "loginPairs" )
-    @Test( priority = 10 )
-    public void ufgWebSiteTest() {
+    @Test( priority = 10, dataProvider = "loginPairs" )
+    public void ufgWebSiteTest(String username, String password) {
         // This test covers login for the Applitools demo site, which is a dummy banking app.
         // The interactions use typical Selenium WebDriver calls,
         // but the verifications use one-line snapshot calls with Applitools Eyes.
@@ -259,27 +258,21 @@ public class ApplitoolsEyesUFGTest {
 
         log.info("Running test '{}'", eyesTestName);
         
-        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
+        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs, username, password);
     }
     
-    // Not using a DataProvider in this example.
-    /* @DataProvider
+    @DataProvider
     public Object[][] loginPairs() {
-        // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
-        String pageURL = forceDiffs ? 
-                "https://demo.applitools.com/index_v2.html" :
-                "https://demo.applitools.com";
-        String pageName = "Login page";
         return new Object[][] {
             new Object[] {
-                    pageURL, pageName, "applibot", "I<3VisualTests"
+                    "applibot", "I<3VisualTests"
+            /*}, new Object[] {
+                    "nullpasswd", ""
             }, new Object[] {
-                    pageURL, pageName, "nullpasswd", ""
-            }, new Object[] {
-                    pageURL, pageName, "randomuser", "123456"
+                    "randomuser", "123456"*/
             }
         };
-    } */
+    }
     
     @AfterMethod
     public void afterMethod(Method testMethod) {

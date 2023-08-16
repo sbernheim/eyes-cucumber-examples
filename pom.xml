@@ -7,8 +7,8 @@
   <description>Example Applitools Eyes Selenium Java Tests for Cucumber</description>
   
   <properties>
-    <maven.compiler.source>18</maven.compiler.source>
-    <maven.compiler.target>18</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <eyes.version>5.63.0</eyes.version>
     <testng.version>7.7.1</testng.version>
     <cucumber.version>7.11.0</cucumber.version>

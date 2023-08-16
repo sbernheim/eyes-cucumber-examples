@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import org.testng.util.Strings;
@@ -102,7 +103,7 @@ public class ApplitoolsBasicUITest {
         batch.addProperty("SDK", "Selenium Java5");
         batch.addProperty("Framework", "TestNG");
         batch.addProperty("Scope", "Basic");
-        batch.addProperty("Hooks", "false");
+        batch.addProperty("Hooks", "true");
         batch.addProperty("Runner", "Classic");
 
         // Create a configuration for Applitools Eyes.
@@ -196,7 +197,7 @@ public class ApplitoolsBasicUITest {
                 new RectangleSize(browserWidth, browserHeight));
         
         try {
-            ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
+            ApplitoolsWebSiteTest.runSingleTest(driver, eyes, forceDiffs);
         } catch (Exception e) {
             throw e;
         } finally {
@@ -303,7 +304,7 @@ public class ApplitoolsBasicUITest {
                 )
          );
 
-        ApplitoolsWebSiteTest.runTest(driver, null, forceDiffs);
+        ApplitoolsWebSiteTest.runSingleTest(driver, null, forceDiffs);
 
         if (ecx) jsExec.executeScript("applitools:endTest", Map.ofEntries(en("status", "Passed")));
 
@@ -311,6 +312,24 @@ public class ApplitoolsBasicUITest {
         driver.quit();
 
         log.info("End basic example test");
+    }
+    
+    @DataProvider
+    public Object[][] loginPairs() {
+        // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
+        String pageURL = forceDiffs ? 
+                "https://demo.applitools.com/index_v2.html" :
+                "https://demo.applitools.com";
+        String pageName = "Login page";
+        return new Object[][] {
+            new Object[] {
+                    pageURL, pageName, "applibot", "I<3VisualTests"
+            }, new Object[] {
+                    pageURL, pageName, "nullpasswd", ""
+            }, new Object[] {
+                    pageURL, pageName, "randomuser", "123456"
+            }
+        };
     }
     
     @AfterSuite

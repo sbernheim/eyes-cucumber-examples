@@ -80,7 +80,6 @@ public class ApplitoolsEyesBasicTest {
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
-        //pageURL = forceDiffs ? pageURL2 : pageURL1;
 
         // Create the runner 
         runner = new ClassicRunner();
@@ -97,7 +96,7 @@ public class ApplitoolsEyesBasicTest {
         batch.addProperty("Framework", "TestNG");
         batch.addProperty("Scope", "Basic");
         batch.addProperty("Hooks", "false");
-        batch.addProperty("Runner", "No");
+        batch.addProperty("Runner", "Classic");
 
         // Create a configuration for Applitools Eyes.
         //System.out.printf("Before: Class for %s - APPLITOOLS creating config\n", this.getClass().getSimpleName());
@@ -183,7 +182,7 @@ public class ApplitoolsEyesBasicTest {
                 new RectangleSize(browserWidth, browserHeight));
 
         try {
-            ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs);
+            ApplitoolsWebSiteTest.runSingleTest(driver, eyes, forceDiffs);
         } catch (Exception e) {
             log.error("Ending Eyes test due to Exception : {}", e);
             throw e;
