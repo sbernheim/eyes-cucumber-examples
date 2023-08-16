@@ -111,7 +111,7 @@ public class ApplitoolsEyesBasicTest {
         // Create a configuration for Applitools Eyes.
         //System.out.printf("Before: Class for %s - APPLITOOLS creating config\n", this.getClass().getSimpleName());
         config = new Configuration();
-        config.setStitchMode(StitchMode.SCROLL);
+        config.setStitchMode(StitchMode.CSS);
 
         if (Strings.isNotNullAndNotEmpty(eyesServerUrl)) {
             //log.warn("\n\n\t--------> APPLITOOLS_SERVER_URL '{}' <-------- {}\n", eyesServerUrl);
@@ -164,6 +164,8 @@ public class ApplitoolsEyesBasicTest {
             log.warn("\n\n\t--------> ALL APPLITOOLS EYES API CALLS ARE DISABLED!!! <-------- {}\n", eyesIsDisabled);
         }
         eyes.setIsDisabled(eyesIsDisabled);
+        
+        eyes.setStitchMode(StitchMode.SCROLL);
         
         // Open Eyes to start visual testing.
         // It is a recommended practice to set all four inputs:
