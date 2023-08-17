@@ -53,8 +53,9 @@ public class ApplitoolsEyesTestNGTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
-    private static String appName = "Capital One";
+    private static final String batchName = "Eyes Demo: Fannie Mae";
+    private static final String defaultAppName = "Fannie Mae Web";
+    private String appName = defaultAppName;
     private int browserHeight = 768;
     private int browserWidth = 1024;
 
@@ -63,7 +64,7 @@ public class ApplitoolsEyesTestNGTest {
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private String eyesTestName = "undef";
+    private String eyesTestName = "Fannie Mae Web Search";
     private String testngTestName = "";
     private String testSuite = "";
 
@@ -72,7 +73,7 @@ public class ApplitoolsEyesTestNGTest {
         testSuite = ctx.getSuite().getName();
         log.info("Before: Suite for {}", testSuite);
         if (!testSuite.isBlank()) {
-            appName = testSuite.isBlank() ? appName : testSuite;
+            appName = (testSuite.isBlank() || testSuite.startsWith("Default suite")) ? defaultAppName : testSuite;
         }
     }
 
@@ -146,9 +147,8 @@ public class ApplitoolsEyesTestNGTest {
         log.info("Before: Method for {}", testMethod.getName());
         
         // You can use values supplied by a DataProvider in your test name.
-        String testName = testngTestName.isBlank() ? testMethod.getName() : testngTestName;
-        eyesTestName = params[0].equals("applibot") ? testName : String.format("%s#%s", testName, params[0]);
-        eyesTestName = (testngTestName.isBlank() || testngTestName.startsWith("Default test")) ? eyesTestName : testngTestName;
+        String testName = (testngTestName.isBlank() || testngTestName.startsWith("Default test")) ? testMethod.getName() : testngTestName;
+        eyesTestName = params[0].equals("mortgage rates") ? testName : String.format("%s#%s", testName, params[0]);
 
         // This method sets up each test with its own Selenium WebDriver and Applitools Eyes objects.
 
@@ -198,6 +198,7 @@ public class ApplitoolsEyesTestNGTest {
         eyes.addProperty("Letter", "A");
         eyes.addProperty("Number", "1");
         eyes.addProperty("Boolean", "true");
+        if (params[0] != null) eyes.addProperty("Search Term", params[0].toString());
         
         // An environment variable that disables all the Eyes API calls.
         if (eyesIsDisabled) {
@@ -220,7 +221,7 @@ public class ApplitoolsEyesTestNGTest {
 
     // Not using a DataProvider for this example
     @Test( priority = 10, dataProvider = "loginPairs" )
-    public void testNgWebSiteTest(String username, String password) {
+    public void Fannie_Mae_Web_Search_Test(String searchTerm) {
         // This test covers login for the Applitools demo site, which is a dummy banking app.
         // The interactions use typical Selenium WebDriver calls,
         // but the verifications use one-line snapshot calls with Applitools Eyes.
@@ -229,18 +230,18 @@ public class ApplitoolsEyesTestNGTest {
 
         log.info("Running test '{}'", eyesTestName);
         
-        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs, username, password);
+        ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs, searchTerm);
     }
     
     @DataProvider
     public Object[][] loginPairs() {
         return new Object[][] {
             new Object[] {
-                    "applibot", "I<3VisualTests"
-            /*}, new Object[] {
-                    "nullpasswd", ""
+                    "mortgage rates"
             }, new Object[] {
-                    "randomuser", "123456"*/
+                    "disaster relief"
+            }, new Object[] {
+                    "economic forecast"
             }
         };
     }

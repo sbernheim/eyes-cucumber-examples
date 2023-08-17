@@ -42,16 +42,16 @@ public class ApplitoolsEyesBasicTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
+    private static final String batchName = "Eyes Demo: Fannie Mae";
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private static final String appName = "Capital One";
-    private String testName = "Capital One";
-    private int browserHeight = 600;
+    private static final String appName = "Fannie Mae Web";
+    private String testName = "Fannie Mae Web Search";
+    private int browserHeight = 768;
     private int browserWidth = 1024;
 
     @Test

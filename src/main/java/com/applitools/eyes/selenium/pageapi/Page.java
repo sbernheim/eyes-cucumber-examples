@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +64,14 @@ public abstract class Page {
             return Optional.of(found.get(0));
         }
         return Optional.empty();
+    }
+    
+    public WebDriverWait waiter() {
+        return waiter(30);
+    }
+
+    public WebDriverWait waiter(long timeoutInSeconds) {
+        return new WebDriverWait(driver, timeoutInSeconds);
     }
     
     public Select toSelect(WebElement e) {

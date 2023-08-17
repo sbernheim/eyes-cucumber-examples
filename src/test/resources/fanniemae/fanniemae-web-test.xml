@@ -1,10 +1,10 @@
 <?xml version = "1.0" encoding = "UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Fannie Mae Web UFG Suite">
+<suite name="Fannie Mae Web Suite">
    <test name="Fannie Mae Web Search Test">
       <classes>
-         <class name="com.applitools.eyes.selenium.testng.examples.ApplitoolsEyesUFGTest"/>
+         <class name="com.applitools.eyes.selenium.testng.examples.ApplitoolsEyesTestNGTest"/>
       </classes>
    </test>
 </suite>

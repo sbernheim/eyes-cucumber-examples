@@ -5,8 +5,12 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,35 +34,46 @@ import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
 public class ApplitoolsWebSiteTest {
     private static final Logger log = LoggerFactory.getLogger(Introspect.thisClass());
     
-    private static final String pageURLDiffs = "https://demo.applitools.com/index_v2.html";
-    private static final String pageURL = "https://demo.applitools.com";
+    //private static final String pageURLDiffs = "https://demo.applitools.com/index_v2.html";
+    private static final String pageURL = "https://www.fanniemae.com";
     
-    private static final String defaultUsername = "applibot";
-    private static final String defaultPassword =  "I<3VisualTests";
+    private static final String defaultSearchTerm = "mortgage rates";
     
     public static void runSingleTest(WebDriver driver, Eyes eyes, boolean forceDiffs) {
-        runTest(driver, eyes, forceDiffs, defaultUsername, defaultPassword);
+        runTest(driver, eyes, forceDiffs, defaultSearchTerm);
     }
 
-    public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs, String username, String password) {
+    public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs, String searchTerm) {
         // Load the login page.
-        driver.get(forceDiffs ? pageURL : pageURLDiffs);
+        driver.get(pageURL);
         
         // Get the text of the footer.
-        String footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
+        String footerText = driver.findElement(By.cssSelector("div#footer-new")).getText();
         log.trace("Found Footer: {}", footerText);
+        
+        // Accept cookies
+        String cookieButtonSelector = "button#onetrust-accept-btn-handler";
+        WebDriverWait acceptCookieWait = new WebDriverWait(driver, 30);
+        try {
+            acceptCookieWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(cookieButtonSelector)));
+            driver.findElement(By.cssSelector(cookieButtonSelector)).click();
+        } catch (TimeoutException e) {
+            log.info("Did not find the Accept Cookies button for this test run: CSS Selector '{}'", cookieButtonSelector);
+        }
             
         // Verify the full login page loaded correctly.
-        if (eyes != null) eyes.check(Target.window().fully().withName("Login page"));
+        if (eyes != null) eyes.check(Target.window().fully().withName("Main page"));
 
-        // Perform login.
-        driver.findElement(By.id("username")).sendKeys(username);
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("log-in")).click();
+        // Click on the search button
+        // Enter search term
+        // Perform search
+        driver.findElement(By.cssSelector("button.fm-toggle-search")).click();;
+        WebElement s = driver.findElement(By.cssSelector("#searchbox > div > div > div.magic-box-input > input"));
+        s.sendKeys(searchTerm);
+        s.sendKeys(Keys.ENTER);
 
         // Verify the full main page loaded correctly.
-        // This snapshot uses LAYOUT match level to avoid differences in closing time text.
-        if (eyes != null) eyes.check(Target.window().fully().withName("Main page"));
+        if (eyes != null) eyes.check(Target.window().fully().withName("Search results"));
     }
     
     public static void logTestResults(TestResultsSummary allTestResults) {
