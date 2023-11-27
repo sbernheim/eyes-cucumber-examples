@@ -48,8 +48,8 @@ public class ApplitoolsWebSiteTest {
         driver.get(pageURL);
         
         // Get the text of the footer.
-        String footerText = driver.findElement(By.cssSelector("div#footer-new")).getText();
-        log.trace("Found Footer: {}", footerText);
+        //String footerText = driver.findElement(By.cssSelector("div#footer-new")).getText();
+        //log.trace("Found Footer: {}", footerText);
         
         // Accept cookies
         String cookieButtonSelector = "button#onetrust-accept-btn-handler";
