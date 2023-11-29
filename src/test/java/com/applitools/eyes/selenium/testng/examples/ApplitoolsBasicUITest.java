@@ -1,7 +1,9 @@
 package com.applitools.eyes.selenium.testng.examples;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,7 +26,10 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
@@ -41,34 +46,23 @@ public class ApplitoolsBasicUITest {
     //private static boolean eyesIsDisabled;
     private static boolean forceDiffs;
     private static boolean logTestResults;
+    private static boolean ecx;
 
     // Applitools Eyes Context objects - shared for all tests
     private static BatchInfo batch;
     private static Configuration config;
     private static EyesRunner runner;
     
-    // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
-
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
-    // Eyes Test meta-data values
-    private static final String appName = "Capital One";
-    private String testName = "Capital One";
-    private int browserHeight = 768;
-    private int browserWidth = 1024;
-
     @BeforeSuite
-    public void createBatchConfigs() {
-        log.info("Start BeforeSuite");
+    public void createBatchContext(ITestContext ctx) {
+        log.info("Before: Suite for suite '{}'", ctx.getSuite().getName());
         
-        // This test covers login for the Applitools demo site, which is a dummy banking app.
-        // The interactions use typical Selenium WebDriver calls,
-        // but the verifications use one-line snapshot calls with Applitools Eyes.
-        // If the page ever changes, then Applitools will detect the changes and highlight them in the dashboard.
-        // Traditional assertions that scrape the page for text values are not needed here.
+        // Checks whether we will run this test on a local browser or on the Execution Cloud
+        ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
 
         // Read the Applitools API key from an environment variable.
         // To find your Applitools API key:
@@ -95,7 +89,7 @@ public class ApplitoolsBasicUITest {
         // Create a new batch for tests.
         // A batch is the collection of visual checkpoints for a test suite.
         // Batches are displayed in the dashboard, so use meaningful names.
-        batch = new BatchInfo(batchName);
+        batch = new BatchInfo(ApplitoolsWebSiteTest.batchName);
         
         // Add Property key/value pairs to group and filter batch results in the Dashboard UI.
         batch.addProperty("Environment", "LOCAL");
@@ -126,22 +120,17 @@ public class ApplitoolsBasicUITest {
 
         log.info("End BeforeSuite");
     }
-
-    @Test
-    public void basicUiWebSiteTest() {
-        log.info("Start basic Eyes Execution Cloud test");
-
-        // Checks whether we will run this test on a local browser or on the Execution Cloud
-        boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
-
+    
+    @BeforeMethod
+    public void createTestContext(ITestContext ctx, Method testMethod) {
         // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
         // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
         // it still needs to run the test one time in a browser to capture snapshots.
         if (ecx) {
+            log.info("Tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
             // Open the browser remotely in the Execution Cloud.
             DesiredCapabilities caps = new DesiredCapabilities();
             caps.setBrowserName("chrome");
-            log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
             try {
                 this.driver = new RemoteWebDriver(new URL(Eyes.getExecutionCloudURL()), caps);
             } catch (Exception e) {
@@ -149,15 +138,15 @@ public class ApplitoolsBasicUITest {
             }
         }
         else {
+            log.info("Tests will execute on your local Chrome browser...");
             // Open the browser with a local ChromeDriver instance.
             ChromeOptions opts = new ChromeOptions();
             if (headless) opts.addArguments("--headless=new");
             this.driver = new ChromeDriver(opts);
-            log.info("Eyes tests will execute on your local Chrome browser...");
         }
         
         // Set the browser window size - height, width
-        driver.manage().window().setSize(new Dimension(browserHeight, browserWidth));
+        driver.manage().window().setSize(new Dimension(ApplitoolsWebSiteTest.browserHeight, ApplitoolsWebSiteTest.browserWidth));
 
         // Set an implicit wait of 10 seconds.
         // For larger projects, use explicit waits for better control.
@@ -167,6 +156,11 @@ public class ApplitoolsBasicUITest {
         
         // If you are using Selenium 3, use the following call instead:
         //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void executionCloudEyesTest(ITestContext ctx) {
+        log.info("Start eyes test");
 
         // Create the Applitools Eyes object connected to the Runner and set its configuration.
         eyes = new Eyes(runner);
@@ -190,11 +184,10 @@ public class ApplitoolsBasicUITest {
         // Open Eyes to start visual testing.
         // It is a recommended practice to set all four inputs:
         eyes.open(
-                driver,   // WebDriver object to "watch"
-                appName,  // The name of the app under test
-                testName, // The name of the test case
-                          // The viewport size for the local browser - width , height
-                new RectangleSize(browserWidth, browserHeight));
+                driver, // WebDriver object to "watch"
+                ApplitoolsWebSiteTest.appName, // The name of the app under test
+                ApplitoolsWebSiteTest.defaultTestName, // The name of the test case
+                new RectangleSize(ApplitoolsWebSiteTest.browserWidth, ApplitoolsWebSiteTest.browserHeight)); // The viewport size for the local browser - width , height
         
         try {
             ApplitoolsWebSiteTest.runSingleTest(driver, eyes, forceDiffs);
@@ -202,16 +195,118 @@ public class ApplitoolsBasicUITest {
             throw e;
         } finally {
             
-            /*if (ecx) jsExec.executeScript("applitools:endTest", "Passed");*/
-
             // Close Eyes
-            eyes.closeAsync();
-            
-            // Quit the WebDriver instance.
-            driver.quit();
-            
+            // eyes.close(false); // Blocking!  If true, will throw an exception if Eyes finds diffs!
+            eyes.closeAsync();  // Non-blocking!  Continue test execution without waiting for results.
         }
         
+    }
+    
+    @Test
+    public void executionCloudNonEyesTest() {
+        log.info("Start non-eyes test");
+
+        JavascriptExecutor jsExec = (JavascriptExecutor) driver;
+        if (ecx) jsExec.executeScript("applitools:startTest", 
+                Map.ofEntries(
+                        en("testName", ApplitoolsWebSiteTest.defaultTestName + " (Non-Eyes)"), 
+                        en("appName", ApplitoolsWebSiteTest.appName), 
+                        en("batch", 
+                                Map.ofEntries(
+                                        en("name", batch.getName()), 
+                                        en("id", batch.getId()),
+                                        en("properties", // Batch custom properties (working)
+                                                List.of(
+                                                        Map.ofEntries(
+                                                                en("name", "Environment"),
+                                                                en("value", "LOCAL")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "Language"),
+                                                                en("value", "Java")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "SDK"),
+                                                                en("value", "Selenium Java5")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "Framework"),
+                                                                en("value", "TestNG")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "Scope"),
+                                                                en("value", "Basic")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "Hooks"),
+                                                                en("value", "true")
+                                                        ),
+                                                        Map.ofEntries(
+                                                                en("name", "Runner"),
+                                                                en("value", "Classic")
+                                                        )
+                                                )
+                                        )
+                                )
+                        ),
+                        en("properties", // Test custom properties (not working)
+                                List.of(
+                                        Map.ofEntries(
+                                                en("name", "Function"),
+                                                en("value", "Login")
+                                        ),
+                                        Map.ofEntries(
+                                                en("name", "Letter"),
+                                                en("value", "B")
+                                        ),
+                                        Map.ofEntries(
+                                                en("name", "Number"),
+                                                en("value", "2")
+                                        ),
+                                        Map.ofEntries(
+                                                en("name", "Boolean"),
+                                                en("value", "false")
+                                        )
+                                )
+                        )
+                )
+         );
+
+        try {
+            ApplitoolsWebSiteTest.runSingleTest(driver, null, forceDiffs);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            
+            if (ecx) jsExec.executeScript("applitools:endTest", Map.ofEntries(en("status", "Passed")));
+
+        }
+
+        log.info("End non-eyes test");
+    }
+    
+    @DataProvider
+    public Object[][] loginPairs() {
+        // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
+        return new Object[][] {
+            new Object[] {
+                    ApplitoolsWebSiteTest.defaultUsername, ApplitoolsWebSiteTest.defaultPassword
+            /*}, new Object[] {
+                    "nullpasswd", ""
+            }, new Object[] {
+                    "randomuser", "123456" */
+            }
+        };
+    }
+    
+    @AfterMethod
+    public void closeTestContext() {
+        // Quit the WebDriver instance.
+        driver.quit();
+    }
+    
+    @AfterSuite
+    public void closeBatchContext() {
         try {
             // Gets results of all the tests AND implicitly closes the Batch
             TestResultsSummary allTestResults = runner.getAllTestResults(false);
@@ -225,120 +320,6 @@ public class ApplitoolsBasicUITest {
         } catch (DiffsFoundException ex) {
             log.error("Applitools Eyes tests found differences! {}", ex);
         }
-
-        log.info("End basic Eyes Execution Cloud test");
-    }
-    
-    @Ignore
-    @Test
-    public void nonEyesTest() {
-        log.info("Start non-eyes test");
-
-        // Checks whether we will run this test on a local browser or on the Execution Cloud
-        boolean ecx = Boolean.parseBoolean(System.getenv().getOrDefault("APPLITOOLS_EXECUTION_CLOUD", "false"));
-
-        // Open the browser with a WebDriver instance - either ChromeDriver for local or RemoteWebDriver
-        // Even if this test will render checkpoints for different setups in the Ultrafast Grid,
-        // it still needs to run the test one time in a browser to capture snapshots.
-        if (ecx) {
-            // Open the browser remotely in the Execution Cloud.
-            DesiredCapabilities caps = new DesiredCapabilities();
-            caps.setBrowserName("chrome");
-            log.info("Eyes tests will execute on the Applitools Self-Healing Execution Cloud! [{}]", Eyes.getExecutionCloudURL());
-            try {
-                this.driver = new RemoteWebDriver(new URL(Eyes.getExecutionCloudURL()), caps);
-            } catch (Exception e) {
-                throw new RuntimeException("Unable to connect to the Applitools Self-Healing Execution Cloud at " + Eyes.getExecutionCloudURL(), e);
-            }
-        }
-        else {
-            // Open the browser with a local ChromeDriver instance.
-            ChromeOptions opts = new ChromeOptions();
-            if (headless) opts.addArguments("--headless=new");
-            this.driver = new ChromeDriver(opts);
-            log.info("Eyes tests will execute on your local Chrome browser...");
-        }
-        
-        // Set the browser window size - height, width
-        driver.manage().window().setSize(new Dimension(browserHeight, browserWidth));
-
-        // Set an implicit wait of 10 seconds.
-        // For larger projects, use explicit waits for better control.
-        // https://www.selenium.dev/documentation/webdriver/waits/
-        // The following call works for Selenium 4:
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        
-        // If you are using Selenium 3, use the following call instead:
-        //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
-        JavascriptExecutor jsExec = (JavascriptExecutor) driver;
-        if (ecx) jsExec.executeScript("applitools:startTest", 
-                Map.ofEntries(
-                        en("testName", "NonEyesTest"), 
-                        en("appName", appName), 
-                        en("batch", 
-                                Map.ofEntries(
-                                        en("name", batch.getName()), 
-                                        en("id", batch.getId())/*,
-                                        en("properties", 
-                                                Map.ofEntries(
-                                                        en("Environment", "LOCAL"),
-                                                        en("Language", "Java"),
-                                                        en("SDK", "Selenium Java5"),
-                                                        en("Framework", "TestNG"),
-                                                        en("Scope", "Basic"),
-                                                        en("Hooks", "false"),
-                                                        en("Runner", "Classic")
-                                                )
-                                        )*/
-                                )
-                        /*),
-                        en("properties",
-                                Map.ofEntries(
-                                        en("Function", "Login"),
-                                        en("Letter", "B"),
-                                        en("Number", "2"),
-                                        en("Boolean", "false")
-                                )*/
-                        )
-                )
-         );
-
-        ApplitoolsWebSiteTest.runSingleTest(driver, null, forceDiffs);
-
-        if (ecx) jsExec.executeScript("applitools:endTest", Map.ofEntries(en("status", "Passed")));
-
-        // Quit the WebDriver instance.
-        driver.quit();
-
-        log.info("End basic example test");
-    }
-    
-    @DataProvider
-    public Object[][] loginPairs() {
-        // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
-        String pageURL = forceDiffs ? 
-                "https://demo.applitools.com/index_v2.html" :
-                "https://demo.applitools.com";
-        String pageName = "Login page";
-        return new Object[][] {
-            new Object[] {
-                    pageURL, pageName, "applibot", "I<3VisualTests"
-            }, new Object[] {
-                    pageURL, pageName, "nullpasswd", ""
-            }, new Object[] {
-                    pageURL, pageName, "randomuser", "123456"
-            }
-        };
-    }
-    
-    @AfterSuite
-    public void closeBatch() {
-        // Gets results of all the tests AND implicitly closes the Batch
-        TestResultsSummary allTestResults = runner.getAllTestResults(false);
-
-        log.info("End non-eyes test");
-        log.info("RESULTS: {}", allTestResults);
     }
     
     public TestEntry en(String key, Object value) {

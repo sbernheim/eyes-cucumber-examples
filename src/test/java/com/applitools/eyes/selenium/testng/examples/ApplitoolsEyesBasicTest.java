@@ -39,28 +39,13 @@ public class ApplitoolsEyesBasicTest {
     private static Configuration config;
     private static EyesRunner runner;
     
-    // Eyes Batch meta-data values
-    private static final String batchName = "Eyes Demo: Capital One";
-
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
-    // Eyes Test meta-data values
-    private static final String appName = "Capital One";
-    private String testName = "Capital One";
-    private int browserHeight = 600;
-    private int browserWidth = 1024;
-
     @Test
     public void basicWebSiteTest() {
         log.info("Start basic UI test");
-
-        // This test covers login for the Applitools demo site, which is a dummy banking app.
-        // The interactions use typical Selenium WebDriver calls,
-        // but the verifications use one-line snapshot calls with Applitools Eyes.
-        // If the page ever changes, then Applitools will detect the changes and highlight them in the dashboard.
-        // Traditional assertions that scrape the page for text values are not needed here.
 
         // Read the Applitools API key from an environment variable.
         // To find your Applitools API key:
@@ -87,7 +72,7 @@ public class ApplitoolsEyesBasicTest {
         // Create a new batch for tests.
         // A batch is the collection of visual checkpoints for a test suite.
         // Batches are displayed in the dashboard, so use meaningful names.
-        batch = new BatchInfo(batchName);
+        batch = new BatchInfo(ApplitoolsWebSiteTest.batchName);
         
         // Add Property key/value pairs to group and filter batch results in the Dashboard UI.
         batch.addProperty("Environment", "LOCAL");
@@ -142,7 +127,7 @@ public class ApplitoolsEyesBasicTest {
         }
         
         // Set the browser window size - height, width
-        driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
+        driver.manage().window().setSize(new Dimension(ApplitoolsWebSiteTest.browserHeight, ApplitoolsWebSiteTest.browserWidth));
 
         // Set an implicit wait of 10 seconds.
         // For larger projects, use explicit waits for better control.
@@ -175,11 +160,10 @@ public class ApplitoolsEyesBasicTest {
         // Open Eyes to start visual testing.
         // It is a recommended practice to set all four inputs:
         eyes.open(
-                driver,   // WebDriver object to "watch"
-                appName,  // The name of the app under test
-                testName, // The name of the test case
-                          // The viewport size for the local browser - width , height
-                new RectangleSize(browserWidth, browserHeight));
+                driver, // WebDriver object to "watch"
+                ApplitoolsWebSiteTest.appName, // The name of the app under test
+                ApplitoolsWebSiteTest.defaultTestName, // The name of the test case
+                new RectangleSize(ApplitoolsWebSiteTest.browserWidth, ApplitoolsWebSiteTest.browserHeight)); // The viewport size for the local browser - width , height
 
         try {
             ApplitoolsWebSiteTest.runSingleTest(driver, eyes, forceDiffs);

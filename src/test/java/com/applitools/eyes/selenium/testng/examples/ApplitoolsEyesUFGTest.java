@@ -28,6 +28,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
+import org.testng.ITestResult;
 import org.testng.annotations.Test;
 import org.testng.util.Strings;
 import org.testng.annotations.BeforeMethod;
@@ -58,40 +59,37 @@ public class ApplitoolsEyesUFGTest {
     private static EyesRunner runner;
     
     // Eyes Batch meta-data values
-    private static final String batchPrefix = "Eyes Demo: ";
-    private static String appName = "Capital One";
-    private static String batchName = batchPrefix + appName;
-    private int browserHeight = 768;
-    private int browserWidth = 1024;
+    private String appName = ApplitoolsWebSiteTest.appName;
+    private String batchName = ApplitoolsWebSiteTest.batchName;
 
     // Test-specific objects
     private WebDriver driver;
     private Eyes eyes;
     
     // Eyes Test meta-data values
-    private String eyesTestName = "Capital One";
+    private String testName = "";
     private String testngTestName = "";
-    private String testSuite = "";
+    private String testngSuiteName = "";
 
     @BeforeSuite
     public void beforeSuite(ITestContext ctx) {
-        testSuite = ctx.getSuite().getName();
-        log.info("Before: Suite for {}", testSuite);
-        if (!testSuite.isBlank() && !testSuite.startsWith("Default suite")) {
-            appName = testSuite.isBlank() ? appName : testSuite;
-            batchName = batchPrefix + appName;
+        log.info("Before: Suite for {}", ctx.getSuite().getName());
+        testngSuiteName = ctx.getSuite().getName();
+        if (!testngSuiteName.isBlank() && !testngSuiteName.startsWith("Default suite")) {
+            appName = testngSuiteName.isBlank() ? appName : testngSuiteName;
+            batchName = ApplitoolsWebSiteTest.batchPrefix + appName;
         }
     }
 
     @BeforeTest
     public void beforeTest(ITestContext ctx) {
+        log.info("Before: Test for test '{}' suite '{}'", ctx.getName(), ctx.getSuite().getName());
         testngTestName = ctx.getName();
-        log.info("Before: Test for {}", testngTestName);
     }
 
     @BeforeClass
-    public void beforeClass() {
-        log.info("Before: Class for {}", Introspect.thisClass());
+    public void beforeClass(ITestContext ctx) {
+        log.info("Before: Class for class {} for test '{}' suite '{}'", Introspect.thisClass(), ctx.getName(), ctx.getSuite().getName());
         
         // Read the Applitools API key from an environment variable.
         // To find your Applitools API key:
@@ -171,14 +169,10 @@ public class ApplitoolsEyesUFGTest {
     }
 
     @BeforeMethod
-    public void beforeMethod(Method testMethod, Object[] params) {
-        log.info("Before: Method for {}", testMethod.getName());
+    public void beforeMethod(ITestContext ctx, Method testMethod, Object[] params) {
+        log.info("Before: Method for method {} class {} for test '{}' suite '{}'", testMethod.getName(), testMethod.getDeclaringClass().getSimpleName(), ctx.getName(), ctx.getSuite().getName());
         
-        // You can use values supplied by a DataProvider in your test name.
-        // Not using a DataProvider for this example
-        //String testName = testngTestName.isBlank() ? testMethod.getName() : testngTestName;
-        //eyesTestName = params[2].equals("applibot") ? testName : String.format("%s#%s", testName, params[2]);
-        eyesTestName = (testngTestName.isBlank() || testngTestName.startsWith("Default test")) ? eyesTestName : testngTestName;
+        testName = (testngTestName.isBlank() || testngTestName.startsWith("Default test")) ? testName : testngTestName;
 
         // This method sets up each test with its own Selenium WebDriver and Applitools Eyes objects.
 
@@ -208,7 +202,7 @@ public class ApplitoolsEyesUFGTest {
         }
 
         // Set the browser window size - height, width
-        driver.manage().window().setSize(new Dimension(browserHeight, browserHeight));
+        driver.manage().window().setSize(new Dimension(ApplitoolsWebSiteTest.browserHeight, ApplitoolsWebSiteTest.browserWidth));
 
         // Set an implicit wait of 10 seconds.
         // For larger projects, use explicit waits for better control.
@@ -237,32 +231,30 @@ public class ApplitoolsEyesUFGTest {
         
         // Open Eyes to start visual testing.
         // It is a recommended practice to set all four inputs:
-        log.info("Before: Method for {} - EYES opening eyes", eyesTestName);
+        log.info("Before: Method for {} - EYES opening eyes", testName);
         eyes.open(
-                driver,       // WebDriver object to "watch"
-                appName,      // The name of the app under test
-                eyesTestName, // The name of the test case
-                              // The viewport size for the local browser
-                new RectangleSize(browserWidth, browserHeight));
+                driver, // WebDriver object to "watch"
+                appName, // The name of the app under test
+                testName, // The name of the test case
+                new RectangleSize(ApplitoolsWebSiteTest.browserWidth, ApplitoolsWebSiteTest.browserHeight)); // The viewport size for the local browser
  
-        log.info("Before: Method for {} - EYES opened", eyesTestName);
+        log.info("Before: Method for {} - EYES opened", testName);
      }
 
     @Test( priority = 10, dataProvider = "loginPairs" )
-    public void ufgWebSiteTest(String username, String password) {
-        // This test covers login for the Applitools demo site, which is a dummy banking app.
-        // The interactions use typical Selenium WebDriver calls,
-        // but the verifications use one-line snapshot calls with Applitools Eyes.
-        // If the page ever changes, then Applitools will detect the changes and highlight them in the dashboard.
-        // Traditional assertions that scrape the page for text values are not needed here.
-
-        log.info("Running test '{}'", eyesTestName);
-        
+    public void ufgWebSiteTest(ITestContext ctx, String username, String password) {
+        log.info("Test:   running method {} class {} for test '{}' suite '{}' PARAMS[username '{}' password '{}']", Introspect.thisMethod(), Introspect.thisClass(), ctx.getName(), username, password);
         ApplitoolsWebSiteTest.runTest(driver, eyes, forceDiffs, username, password);
     }
     
+    /*
+     * DataProvider methods can declare either a ITestContext or java.lang.reflect.Method parameter
+     * 
+     * see: https://testng.org/doc/documentation-main.html#native-dependency-injection
+     */
     @DataProvider
-    public Object[][] loginPairs() {
+    public Object[][] loginPairs(ITestContext ctx, Method testMethod) {
+        log.info("Before: DataProvider for method {} class {} for test '{}' suite '{}'", testMethod.getName(), testMethod.getDeclaringClass().getSimpleName(), ctx.getName(), ctx.getSuite().getName());
         return new Object[][] {
             new Object[] {
                     "applibot", "I<3VisualTests"
@@ -275,8 +267,9 @@ public class ApplitoolsEyesUFGTest {
     }
     
     @AfterMethod
-    public void afterMethod(Method testMethod) {
-        log.info("After:  Method for {}", testMethod.getName());
+    public void afterMethod(ITestResult result, Method testMethod) {
+        log.info("After:  Method for method {} class {}", testMethod.getName(), testMethod.getDeclaringClass().getSimpleName());
+        log.info("After:  Method for method {} class {} for test '{}' suite '{}'", result.getMethod().getMethodName(), result.getTestClass().getName(), result.getTestContext().getName(), result.getTestContext().getSuite().getName());
 
         // Quit the WebDriver instance.
         driver.quit();
@@ -293,8 +286,8 @@ public class ApplitoolsEyesUFGTest {
     }
 
     @AfterClass
-    public void afterClass() {
-         log.info("After:  Class for {}", Introspect.thisClass());
+    public void afterClass(ITestContext ctx) {
+        log.info("After:  Class for class {} for test '{}' suite '{}'", Introspect.thisClass(), ctx.getName(), ctx.getSuite().getName());
 
         // Call runner.getAllTestResults() to close the batch and report visual differences to the console.
         // Note that this call forces TestNG to wait synchronously for all visual checkpoints to complete.
@@ -316,12 +309,13 @@ public class ApplitoolsEyesUFGTest {
 
     @AfterTest
     public void afterTest(ITestContext ctx) {
-        log.info("After:  Test for {}", testngTestName);
+        log.info("After:  Test for test '{}' suite '{}'", ctx.getName(), ctx.getSuite().getName());
     }
 
     @AfterSuite
-    public void afterSuite() {
-        log.info("After:  Suite for {}", testSuite);
+    public void afterSuite(ITestContext ctx) {
+        log.info("After:  Suite for suite '{}'", ctx.getSuite().getName());
     }
+
 
 }

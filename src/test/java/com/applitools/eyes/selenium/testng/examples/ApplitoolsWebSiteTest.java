@@ -30,23 +30,37 @@ import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
 public class ApplitoolsWebSiteTest {
     private static final Logger log = LoggerFactory.getLogger(Introspect.thisClass());
     
+    // Eyes Batch and Test meta-data values
+    static final String batchPrefix = "Eyes Demo: ";
+    static String appName = "Acme Bank";
+    static String batchName = batchPrefix + appName;
+    static String defaultTestName = "loginTest";
+    static int browserHeight = 768;
+    static int browserWidth = 1024;
+
     private static final String pageURLDiffs = "https://demo.applitools.com/index_v2.html";
     private static final String pageURL = "https://demo.applitools.com";
     
-    private static final String defaultUsername = "applibot";
-    private static final String defaultPassword =  "I<3VisualTests";
+    static final String defaultUsername = "applibot";
+    static final String defaultPassword =  "I<3VisualTests";
     
     public static void runSingleTest(WebDriver driver, Eyes eyes, boolean forceDiffs) {
         runTest(driver, eyes, forceDiffs, defaultUsername, defaultPassword);
     }
 
     public static void runTest(WebDriver driver, Eyes eyes, boolean forceDiffs, String username, String password) {
+        // This test covers login for the Applitools demo site, which is a dummy banking app.
+        // The interactions use typical Selenium WebDriver calls,
+        // but the verifications use one-line snapshot calls with Applitools Eyes.
+        // If the page ever changes, then Applitools will detect the changes and highlight them in the dashboard.
+        // Traditional assertions that scrape the page for text values are not needed here.
+
         // Load the login page.
         driver.get(forceDiffs ? pageURL : pageURLDiffs);
         
         // Get the text of the footer.
-        String footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
-        log.trace("Found Footer: {}", footerText);
+        /*String footerText = driver.findElement(By.cssSelector("div.site-footer")).getText();
+        log.trace("Found Footer: {}", footerText);*/
             
         // Verify the full login page loaded correctly.
         if (eyes != null) eyes.check(Target.window().fully().withName("Login page"));
