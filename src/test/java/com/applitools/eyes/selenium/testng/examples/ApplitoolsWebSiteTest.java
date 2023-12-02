@@ -2,11 +2,9 @@ package com.applitools.eyes.selenium.testng.examples;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +18,6 @@ import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.StepInfo.AppUrls;
 import com.applitools.eyes.selenium.BrowserType;
 import com.applitools.eyes.selenium.Eyes;
-import com.applitools.eyes.selenium.fluent.SeleniumCheckSettings;
 import com.applitools.eyes.selenium.fluent.Target;
 import com.applitools.eyes.selenium.introspection.Introspect;
 import com.applitools.eyes.visualgrid.model.EmulationBaseInfo;
@@ -75,44 +72,55 @@ public class ApplitoolsWebSiteTest {
         if (eyes != null) eyes.check(Target.window().fully().withName("Main page"));
     }
     
+    /*
+     * Logs a full description of all TestResults in the passed TestResultsSummary object.
+     * 
+     * A TestResultsSummary object models all of the test results for all the tests run by the
+     * an instance of the Runner class.  Usually all those tests are within the same batch, but a
+     * single Runner instance can be used to run tests for more than one batch.
+     * 
+     * A TestResultsSummary object contains one or more TestResultContainer objects.
+     * 
+     * A TestResultContainer object models a test result with a potential error status and
+     * meta-data about the browser or device that rendered the check images for the result.
+     * 
+     * A TestResults object models a single test result.
+     * 
+     * A TestResults object contains one or more StepInfo objects that model the step results.
+     */
     public static void logTestResults(TestResultsSummary allTestResults) {
-        // You can also traverse the array of TestResultContainer objects in the TestResultsSummary for detailed
+        // Traverse the array of TestResultContainer objects in the TestResultsSummary for detailed
         // information about the results of each test launched by this Runner.
         String currentBatchId = "";
+
+        // There are two ways to get all the test results from the TestResultsSummary object!
+        //
+        // The iterator method returns a generic java.util.Iterator of TestResultContainer objects.
+        //Iterator<TestResultContainer> it = allTestResults.iterator();
+        // 
+        // The getAllTestResults method returns an array of TestResultContainer objects.
         for (TestResultContainer resultContainer : allTestResults.getAllResults()) {
-            TestResults results = resultContainer.getTestResults(); // A single test result containing multiple step results
+            String prefix = "    ";
+
+            // A TestResults object models a single test result containing multiple step results.
+            TestResults results = resultContainer.getTestResults(); 
 
             String batchId = results.getBatchId();
             String batchName = results.getBatchName();
             String branchName = results.getBranchName(); // Will be "default" unless your test set a batch name
-            SessionUrls testLinks = results.getAppUrls();
+            String device = "DESKTOP";
 
-            if (currentBatchId.equals(batchId)) {
+            if (!currentBatchId.equals(batchId)) {
                 currentBatchId = batchId;
                 log.info("Batch '{}' for baseline branch '{}' [{}]", batchName, branchName, batchId);
+
+                SessionUrls testLinks = results.getAppUrls();
                 if (testLinks != null) {
-                    log.info("link to batch : {}", testLinks.getBatch());
+                    log.info("- batch link {}", testLinks.getBatch());
                 }
             }
-
-            String appName = results.getAppName();
-            String testName = results.getName();
-            String hostApp = results.getHostApp();
-            String hostOS = results.getHostOS();
-            RectangleSize hostSize = results.getHostDisplaySize();
-            String device = "DESKTOP";
-            Calendar startedAtCal = results.getStartedAt();
-            String startedAt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a z").format(startedAtCal.getTime());
-            TestResultsStatus testStatus = results.getStatus(); // An enum with Passed, Unresolved, Failed and NotOpened values
-            boolean isPassed = results.isPassed();
-            boolean isNew = results.isNew();
-            boolean isDifferent = results.isDifferent();
-            boolean isAborted = results.isAborted();
-            int durationInSeconds = results.getDuration();
-            log.info("    {} : App '{}' Test '{}' on '{}' '{}' at [{}]", 
-                    testStatus, appName, testName, hostOS, hostApp, hostSize);
-            log.info("        started at '{}' runtime {} seconds", 
-                    startedAt, durationInSeconds);
+            
+            logTestResultsInfo(results, prefix);
 
             RenderBrowserInfo browserInfo = resultContainer.getBrowserInfo(); // Info on how this test was rendered in the UFG
             if (browserInfo != null) {
@@ -133,52 +141,100 @@ public class ApplitoolsWebSiteTest {
                     device = String.format("%s in %s mode as an emulated iOS device", iosDeviceInfo.getDeviceName(), iosDeviceInfo.getScreenOrientation());
                 }
 
-                log.info("        rendered on '{}' deviceSize [{}] viewportSize [{}] with '{}'", device, deviceSize, viewportSize, renderInfo);
+                log.info("{}- rendered on '{}' deviceSize [{}] viewportSize [{}] with '{}'", prefix, device, deviceSize, viewportSize, renderInfo);
                 
                 String baselineEnvName = browserInfo.getBaselineEnvName();
                 if (baselineEnvName != null && !baselineEnvName.isBlank()) {
-                    log.info("        compared to named environment '{}'", baselineEnvName);
+                    log.info("{}- compared to named environment '{}'", prefix, baselineEnvName);
                 }
             }
 
-            if (testLinks != null) {
-                log.info("        link to test  : {}", testLinks.getSession());
-            }
-            
-            if (isAborted) {
-                log.warn("         NOTE: THIS TEST WAS ABORTED BEFORE COMPLETION!");
-            } else if (isNew) {
-                log.info("        This is a NEW test!");
-            } else if (isPassed) {
-                log.info("        This test passed!");
-            } else if (isDifferent) {
-                log.info("        This test found differences!");
-            }
-
-            int stepsCount = results.getSteps();
-            int stepsMatched = results.getMatches();
-            int stepsMatchedExactly = results.getExactMatches();
-            int stepsMismatched = results.getMismatches();
-            int stepsMissing = results.getMissing();
-            log.info("        {} of {} steps matched ({} exactly), {} had differences, and {} were missing", 
-                    stepsMatched, stepsCount, stepsMatchedExactly, stepsMismatched, stepsMissing);
-            
-            int stepNumber = 0;
-            for (StepInfo step : results.getStepsInfo()) {
-                String stepResult = step.getIsDifferent() ? "found differences" : "matched the baseline";
-                if (!step.getHasBaselineImage()) stepResult = isNew ? "is a new step" : "did not have a baseline image";
-                if (!step.getHasCurrentImage()) stepResult = "did not have a checkpoint image";
-                log.info("        step {} of {} {}", ++stepNumber, stepsCount, stepResult);
-                AppUrls stepLinks = step.getAppUrls();
-                if (stepLinks != null) {
-                    log.info("            link to view step : {}", stepLinks.getStep());
-                    log.info("            link to edit step : {}", stepLinks.getStepEditor());
-                }
-            }
+            logTestResultsSteps(results, prefix);
 
             Throwable testException = resultContainer.getException(); // Should be null if there was no Exception
-            if (testException != null) log.info("        exception thrown:", testException);
+            if (testException != null) log.warn("{}- Exception thrown:", prefix, testException);
         }
+    }
+    
+    /*
+     * Logs a full description of the passed TestResults object and its contents.
+     * 
+     * A TestResults object models a single test result.
+     * 
+     * A TestResults object contains one or more StepInfo objects that model the step results.
+     */
+    public static void logTestResults(TestResults results) {
+        String prefix = "";
+        logTestResultsInfo(results, prefix);
+        logTestResultsSteps(results, prefix);
+    }
+
+    /*
+     * Logs the status, test name, app name, and meta-data of the passed TestResults object
+     */
+    public static void logTestResultsInfo(TestResults results, String prefix) {
+       String appName = results.getAppName();
+       String testName = results.getName();
+       String hostApp = results.getHostApp();
+       String hostOS = results.getHostOS();
+       RectangleSize hostSize = results.getHostDisplaySize();
+       Calendar startedAtCal = results.getStartedAt();
+       String startedAt = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a z").format(startedAtCal.getTime());
+       TestResultsStatus testStatus = results.getStatus(); // An enum with Passed, Unresolved, Failed and NotOpened values
+       int durationInSeconds = results.getDuration();
+
+       log.info("{}{} : Test '{}' of App '{}'", 
+               prefix, testStatus, appName, testName);
+       log.info("{}- on '{}' '{}' at [{}]", 
+               prefix, hostOS, hostApp, hostSize);
+       log.info("{}- started at '{}' runtime {} seconds", 
+               prefix, startedAt, durationInSeconds);
+
+       if (results.isAborted()) log.warn("{}- THIS TEST WAS ABORTED BEFORE COMPLETION!", prefix);
+       if (results.isNew()) log.info("{}- This is a NEW test!", prefix);
+       if (results.isPassed()) log.info("{}- This test passed!", prefix);
+       if (results.isDifferent()) log.info("{}- This test found differences!", prefix);
+
+       SessionUrls testLinks = results.getAppUrls();
+       if (testLinks != null) {
+           log.info("{}- test link  {}", prefix, testLinks.getSession());
+           if (prefix.isEmpty()) log.info("{}- batch link {}", testLinks.getBatch());
+       }
+    }
+       
+    /*
+     * Logs the content of each StepInfo in the passed TestResults object
+     */
+    public static void logTestResultsSteps(TestResults results, String prefix) {
+       int stepsCount = results.getSteps();
+       boolean isNew = results.isNew();
+       int stepsMatched = results.getMatches();
+       int stepsMatchedExactly = results.getExactMatches();
+       int stepsMismatched = results.getMismatches();
+       int stepsMissing = results.getMissing();
+       log.info("{}+ {} of {} steps matched ({} exactly), {} had differences, and {} were missing", 
+               prefix, stepsMatched, stepsCount, stepsMatchedExactly, stepsMismatched, stepsMissing);
+       
+       int stepNumber = 0;
+       for (StepInfo step : results.getStepsInfo()) {
+           String stepName = step.getName();
+           String stepResult = step.getIsDifferent() ? "found differences" : "matched the baseline";
+           String stepStatus = step.getIsDifferent() ? "DIFFS" : "MATCH";
+           if (!step.getHasBaselineImage()) {
+               stepResult = isNew ? "is a new test step" : "did not have a baseline image";
+               stepStatus = isNew ? "NEW T" : "NEW S";
+           }
+           if (!step.getHasCurrentImage()) {
+               stepResult = "did not have a checkpoint image";
+               stepStatus = "UNDEF";
+           }
+           log.info("{}----+ {} step '{}' ({} of {}) {}", prefix, stepStatus, stepName, ++stepNumber, stepsCount, stepResult);
+           AppUrls stepLinks = step.getAppUrls();
+           if (stepLinks != null) {
+               log.info("{}    - view link : {}", stepLinks.getStep());
+               log.info("{}    - edit link : {}", stepLinks.getStepEditor());
+           }
+       }
     }
 
 }

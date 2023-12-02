@@ -271,9 +271,6 @@ public class ApplitoolsEyesUFGTest {
         log.info("After:  Method for method {} class {}", testMethod.getName(), testMethod.getDeclaringClass().getSimpleName());
         log.info("After:  Method for method {} class {} for test '{}' suite '{}'", result.getMethod().getMethodName(), result.getTestClass().getName(), result.getTestContext().getName(), result.getTestContext().getSuite().getName());
 
-        // Quit the WebDriver instance.
-        driver.quit();
-
         // Close Eyes to tell the server it should display the results.
         eyes.closeAsync();
 
@@ -283,6 +280,10 @@ public class ApplitoolsEyesUFGTest {
 
         // If you want the TestNG test to wait synchronously for all checkpoints to complete, then use `eyes.close()`.
         // If any checkpoints are unresolved or failed, then `eyes.close()` will make the TestNG test fail.
+
+        // Quit the WebDriver instance.
+        driver.quit();
+
     }
 
     @AfterClass
