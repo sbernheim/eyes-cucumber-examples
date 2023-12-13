@@ -7,6 +7,7 @@ import java.time.Duration;
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.RectangleSize;
+import com.applitools.eyes.TestResults;
 import com.applitools.eyes.TestResultsSummary;
 import com.applitools.eyes.exceptions.DiffsFoundException;
 import com.applitools.eyes.selenium.ClassicRunner;
@@ -76,6 +77,8 @@ public class ApplitoolsEyesExecutionCloudTest {
 
         // Switch to the V2 URL to force some diffs (set FORCE_DIFFERENCES env var to "true")
         forceDiffs = Boolean.parseBoolean(System.getenv().getOrDefault("FORCE_DIFFERENCES", "false"));
+        
+        logTestResults = Boolean.parseBoolean(System.getenv().getOrDefault("LOG_DETAILED_TEST_RESULTS", "false"));
 
         // Create the runner 
         runner = new ClassicRunner();
@@ -205,21 +208,30 @@ public class ApplitoolsEyesExecutionCloudTest {
 
         // Close Eyes to tell the server it should display the results.
         //
-        /* TestResults results = eyes.close(false); // Blocking! 
-        logTestResults ? ApplitoolsWebSiteTest.logTestResults(results) : log.info("RESULT: {}", results); */
+        TestResults results = eyes.close();
+        //TestResults results = eyes.close(false);
+        // Blocking! 
+        //logTestResults ? ApplitoolsWebSiteTest.logTestResults(results) : log.info("RESULT: {}", results);
+        if (logTestResults) {
+            ApplitoolsWebSiteTest.logTestResults(results);
+        } else {
+            log.info("RESULT: {}", results);
+        }
         //
         // The close method will wait synchronously for the Eyes Service to complete all the visual
         // checks captured by the closing test, and return the results as a TestResults object.
         //
-        // When passed false (by default), the close method will NOT throw an Exception, even if the
-        // Eyes service finds diffs for one or more of the closing test's visual UI checks.  Your
-        // test code must then check the returned TestResults for Unresolved or Failed results.
+        // When passed false, the close method will NOT throw an Exception, even if the Eyes service
+        // finds diffs for one or more of the closing test's visual UI checks.  Your test code must
+        // then check the returned TestResults for Unresolved or Failed results.
         //
         // When passed true, the close method will throw a DiffsFoundException if the Eyes Service 
         // found diffs for any of the visual UI checks run by the closing test, and TestNG will then
         // fail the closing test.
         //
-        eyes.closeAsync();  // Non-blocking!
+        // The close method defaults to true when called without a parameter.
+        //
+        //eyes.closeAsync();  // Non-blocking!
         // 
         // Warning: eyes.closeAsync() will NOT wait for visual checks to complete.
         //
